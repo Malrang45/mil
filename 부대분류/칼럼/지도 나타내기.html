@@ -77,7 +77,7 @@
             .control-panel { height: auto; padding: 16px; border-radius: 8px; gap: 16px; }
             
             .btn-group { max-height: none; overflow-y: visible; }
-            .btn-choice { padding: 8px 14px; font-size: 13px; } /* 모바일 터치 영역 최적화 */
+            .btn-choice { padding: 8px 14px; font-size: 13px; }
             
             .stats-box { margin-top: 0; }
             #map { height: 450px; border-radius: 8px; }
@@ -230,7 +230,7 @@
         };
 
         let parsedData = [];
-        let selectedYear = "";
+        let selectedYear = "전체"; // 기본값을 '전체'로 변경합니다.
         let selectedSeries = "";
         let map;
         let markerLayer;
@@ -283,10 +283,15 @@
                 return;
             }
 
-            const years = [...new Set(parsedData.map(d => d.year))].sort().reverse();
+            // 연도 배열 맨 앞에 '전체' 옵션을 추가합니다.
+            const years = ["전체", ...new Set(parsedData.map(d => d.year))].sort((a, b) => {
+                if (a === "전체") return -1;
+                if (b === "전체") return 1;
+                return b - a; // 최신 연도가 위로 오도록 정렬
+            });
             const seriesList = [...new Set(parsedData.map(d => d.series))].sort();
 
-            selectedYear = years.includes("2025") ? "2025" : (years.includes("2019") ? "2019" : years[0]);
+            selectedYear = "전체"; // 연도 기본값 통합 지정
             selectedSeries = seriesList.includes("건축") ? "건축" : (seriesList.includes("통신") ? "통신" : seriesList[0]);
 
             renderFilterButtons('year-container', years, 'year', selectedYear);
@@ -302,7 +307,7 @@
             list.forEach(item => {
                 const btn = document.createElement('button');
                 btn.className = `btn-choice ${type}-btn ${item === defaultValue ? 'active' : ''}`;
-                btn.textContent = type === 'year' ? item + '년' : item;
+                btn.textContent = type === 'year' && item !== '전체' ? item + '년' : item;
                 
                 btn.onclick = () => {
                     document.querySelectorAll(`.${type}-btn`).forEach(b => b.classList.remove('active'));
@@ -319,7 +324,12 @@
             markerLayer.clearLayers();
             if (parsedData.length === 0) return;
 
-            const filtered = parsedData.filter(d => d.year === selectedYear && d.series === selectedSeries);
+            // 💡 핵심 변경 항목: selectedYear가 '전체'이면 연도 필터링을 건너뜁니다.
+            const filtered = parsedData.filter(d => {
+                const matchSeries = d.series === selectedSeries;
+                const matchYear = selectedYear === "전체" || d.year === selectedYear;
+                return matchSeries && matchYear;
+            });
             
             document.getElementById('stat-filtered-cnt').textContent = filtered.length + '자리';
             const ratio = ((filtered.length / parsedData.length) * 100).toFixed(1);
@@ -334,10 +344,11 @@
             filtered.forEach(item => {
                 const reg = item.region;
                 if (!regionGroups[reg]) {
-                    regionGroups[reg] = { count: 0, units: [] };
+                    regionGroups[reg] = { count: 0, units: [], years: [] };
                 }
                 regionGroups[reg].count++;
                 if (item.unit) regionGroups[reg].units.push(item.unit);
+                if (item.year) regionGroups[reg].years.push(item.year);
             });
 
             const currentBounds = [];
@@ -406,13 +417,16 @@
                     });
 
                     const uniqueUnits = [...new Set(group.units)].slice(0, 4).join(', ');
+                    // 💡 마커 내부 팝업에 포함된 데이터들의 연도 분포도 함께 표시해 줍니다.
+                    const uniqueYears = [...new Set(group.years)].sort().join(', ');
 
                     const popupContent = `
                         <div class="custom-popup" style="font-size:13px; line-height:1.5;">
                             <h3>📍 ${regionName} ${matchedByUnit ? '<span style="color:#10b981;font-size:11px;">(부대명 위치추적)</span>' : ''}</h3>
                             <div><b>배정 자리 수:</b> <span class="badge">${group.count}개</span></div>
                             <div><b>선택 조건 내 비율:</b> <b>${percentage}%</b></div>
-                            <div style="font-size:11px; color:#64748b; margin-top:5px; word-break:keep-all;">소속 부대: ${uniqueUnits || '정보 없음'}</div>
+                            <div style="font-size:11px; color:#64748b; margin-top:5px; word-break:keep-all;"><b>포함 연도:</b> ${uniqueYears}년</div>
+                            <div style="font-size:11px; color:#64748b; margin-top:2px; word-break:keep-all;"><b>소속 부대:</b> ${uniqueUnits || '정보 없음'}</div>
                         </div>
                     `;
                     marker.bindPopup(popupContent);
