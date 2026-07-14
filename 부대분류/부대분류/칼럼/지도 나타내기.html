@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>군무원 배치 현황 자동 시각화 시스템</title>
+    <!-- 오픈소스 지도 라이브러리 (로컬 file:/// 환경 완벽 지원) -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <!-- 💡 상위 폴더(../)에 있는 data.js 파일을 안전하게 로드합니다. -->
+    <script src="../data.js" defer></script>
+    
+    <style>
+        :root {
+            --primary: #1e3a8a;
+            --primary-light: #2563eb;
+            --active-green: #22c55e;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --border: #e2e8f0;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
+        body { background-color: var(--bg); padding: 16px; display: flex; flex-direction: column; gap: 16px; }
+        
+        header {
+            background: linear-gradient(135deg, var(--primary), #0f172a);
+            color: white; padding: 20px; border-radius: 12px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+
+        /* 💻 데스크톱 기본 레이아웃 */
+        .dashboard-layout { display: grid; grid-template-columns: 380px 1fr; gap: 20px; }
+        .control-panel { background: var(--card-bg); border-radius: 12px; padding: 20px; border: 1px solid var(--border); display: flex; flex-direction: column; gap: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); height: 680px;}
+        
+        .section-title { font-size: 15px; font-weight: bold; margin-bottom: 10px; color: #334155; }
+        .btn-group { display: flex; flex-wrap: wrap; gap: 6px; max-height: 220px; overflow-y: auto; padding-right: 4px; }
+        
+        .btn-choice { background: #f1f5f9; border: 1px solid var(--border); padding: 6px 12px; border-radius: 20px; font-size: 12px; cursor: pointer; transition: all 0.2s; font-weight: 500; }
+        .btn-choice:hover { background: #e2e8f0; }
+        
+        .year-btn.active { background: var(--active-green); color: white; border-color: var(--active-green); }
+        .series-btn.active { background: var(--primary-light); color: white; border-color: var(--primary-light); }
+
+        .file-upload-box { background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; padding: 12px; display: flex; flex-direction: column; gap: 6px; }
+
+        .stats-box { background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; padding: 14px; margin-top: auto; }
+        .stats-row { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 13px; }
+        .stats-value { font-weight: bold; color: var(--primary-light); }
+
+        #map { height: 680px; border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+        
+        .custom-popup h3 { margin-bottom: 6px; color: var(--primary); font-size: 14px; border-bottom: 2px solid #e2e8f0; padding-bottom: 4px;}
+        .badge { background: var(--primary-light); color: white; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: bold; }
+        
+        #status-message { font-size: 12px; font-weight: bold; margin-top: 5px; color: #f59e0b; word-break: break-all; max-height: 70px; overflow-y: auto; }
+
+        .map-tooltip {
+            background: rgba(255, 255, 255, 0.95) !important;
+            border: 1px solid var(--primary) !important;
+            border-radius: 4px !important;
+            padding: 4px 8px !important;
+            font-size: 12px !important;
+            font-weight: bold !important;
+            color: #1e293b !important;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+        }
+
+        /* 📱 모바일 및 태블릿 반응형 레이아웃 오버라이드 */
+        @media (max-width: 768px) {
+            body { padding: 12px; gap: 12px; }
+            header { padding: 14px; border-radius: 8px; }
+            header h1 { font-size: 16px !important; }
+            header p { font-size: 11px !important; }
+
+            .dashboard-layout { display: flex; flex-direction: column; gap: 12px; }
+            .control-panel { height: auto; padding: 16px; border-radius: 8px; gap: 16px; }
+            
+            .btn-group { max-height: none; overflow-y: visible; }
+            .btn-choice { padding: 8px 14px; font-size: 13px; }
+            
+            .stats-box { margin-top: 0; }
+            #map { height: 450px; border-radius: 8px; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div>
+            <h1 style="font-size: 20px; margin-bottom: 4px;">군무원 배치 현황 자동 시각화 시스템</h1>
+            <p style="font-size: 12px; opacity: 0.8;">상위 폴더의 data.js 파일 내 DATA_STORAGE 변수를 기반으로 지도를 구현합니다.</p>
+        </div>
+    </header>
+
+    <div class="dashboard-layout">
+        <div class="control-panel">
+            <div class="file-upload-box">
+                <div class="section-title" style="margin-bottom:0; font-size:13px;">ℹ️ 연동 상태</div>
+                <p style="font-size:11px; color:#64748b; line-height:1.4;">상위 폴더 내부의 data.js 데이터 저장소와 즉시 동기화가 활성화되어 있습니다.</p>
+            </div>
+
+            <div>
+                <div class="section-title">📅 임용예정년도 선택</div>
+                <div class="btn-group" id="year-container"><p style="font-size:12px; color:#94a3b8;">데이터를 읽어오는 중입니다...</p></div>
+            </div>
+
+            <div>
+                <div class="section-title">🛠️ 직렬 선택</div>
+                <div class="btn-group" id="series-container"><p style="font-size:12px; color:#94a3b8;">데이터를 읽어오는 중입니다...</p></div>
+            </div>
+
+            <div class="stats-box">
+                <div class="section-title" style="margin-bottom:8px;">📊 실시간 필터 결과</div>
+                <div id="status-message">데이터 로딩 중...</div>
+                <div class="stats-row" style="margin-top: 8px;">
+                    <span>조건에 맞는 배정 수:</span>
+                    <span class="stats-value" id="stat-filtered-cnt">0자리</span>
+                </div>
+                <div class="stats-row">
+                    <span>전체 데이터 대비 비율:</span>
+                    <span class="stats-value" id="stat-ratio">0%</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="map"></div>
+    </div>
+
+    <script>
+        const globalRegionCoordinates = {
+            // [광역시/특별시]
+            '서울': [37.5665, 126.9780], '인천': [37.4563, 126.7052],
+            '대전': [36.3504, 127.3845], '대구': [35.8714, 128.6014],
+            '부산': [35.1796, 129.0756], '울산': [35.5389, 129.3117],
+            '세종': [36.4800, 127.2890], '제주': [33.4996, 126.5312],
+            '광주': [35.1595, 126.8526], '광주(전남)': [35.1595, 126.8526], '전남(광주)': [35.1595, 126.8526], '전남광주': [35.1595, 126.8526],
+
+            // [경기도]
+            '경기 고양': [37.6584, 126.8320], '고양': [37.6584, 126.8320],
+            '경기 화성': [37.1995, 126.8312], '화성': [37.1995, 126.8312],
+            '경기 이천': [37.2724, 127.4351], '이천': [37.2724, 127.4351],
+            '경기 양주': [37.7853, 127.0457], '양주': [37.7853, 127.0457],
+            '경기 남양주': [37.6360, 127.2165], '남양주': [37.6360, 127.2165],
+            '경기 과천': [37.4264, 127.4209], '과천': [37.4264, 127.4209],
+            '경기 파주': [37.7594, 126.7801], '파주': [37.7594, 126.7801],
+            '경기 포천': [37.8949, 127.2003], '포천': [37.8949, 127.2003],
+            '경기 연천': [38.0964, 127.0746], '연천': [38.0964, 127.0746],
+            '경기 용인': [37.2410, 127.1774], '용인': [37.2410, 127.1774],
+            '경기 평택': [36.9921, 127.1129], '평택': [36.9921, 127.1129],
+            '경기 의정부': [37.7381, 127.0337], '의정부': [37.7381, 127.0337],
+            '경기 시흥': [37.3802, 126.8027], '시흥': [37.3802, 126.8027],
+            '경기 동두천': [37.9037, 127.0548], '동두천': [37.9037, 127.0548],
+            '경기 가평': [37.8314, 127.5095], '가평': [37.8314, 127.5095],
+            '경기 광명': [37.4785, 126.8647], '광명': [37.4785, 126.8647],
+            '경기 안양': [37.3916, 126.9277], '안양': [37.3916, 126.9277],
+            '경기 하남': [37.5394, 127.2144], '하남': [37.5394, 127.2144],
+            '경기 안성': [37.0080, 127.2798], '안성': [37.0080, 127.2798],
+            '경기 양평': [37.4918, 127.4875], '양평': [37.4918, 127.4875],
+            '경기 여주': [37.2982, 127.6371], '여주': [37.2982, 127.6371],
+            '경기 부천': [37.5034, 126.7660], '부천': [37.5034, 126.7660],
+            '경기 안산': [37.3219, 126.8309], '안산': [37.3219, 126.8309],
+            '경기 광주': [37.4040, 127.2520], '광주(경기)': [37.4040, 127.2520], '경기광주': [37.4040, 127.2520],
+            '김포': [37.6152, 126.7156], '구리': [37.5943, 127.1296],
+
+            // [강원도]
+            '강원 춘천': [37.8813, 127.7298], '춘천': [37.8813, 127.7298],
+            '강원 철원': [38.1469, 127.3134], '철원': [38.1469, 127.3134],
+            '강원 인제': [38.0696, 128.1704], '인제': [38.0696, 128.1704],
+            '강원 강릉': [37.7522, 128.8758], '강릉': [37.7522, 128.8758],
+            '강원 홍천': [37.6970, 127.8887], '홍천': [37.6970, 127.8887],
+            '강원 원주': [37.3422, 127.9201], '원주': [37.3422, 127.9201],
+            '강원 고성': [38.3805, 128.4682], '고성(강원)': [38.3805, 128.4682], '강원고성': [38.3805, 128.4682],
+            '강원 양구': [38.1060, 127.9899], '양구': [38.1060, 127.9899],
+            '강원 화천': [38.1056, 127.7083], '화천': [38.1056, 127.7083],
+            '강원 속초': [38.2070, 128.5918], '속초': [38.2070, 128.5918],
+            '강원 삼척': [37.4498, 129.1652], '삼척': [37.4498, 129.1652],
+            '강원 동해': [37.5247, 129.1143], '동해': [37.5247, 129.1143],
+            '강원 영월': [37.1838, 128.4619], '영월': [37.1838, 128.4619],
+            '횡성': [37.4912, 127.9846], '양양': [38.0754, 128.6190],
+
+            // [충청도]
+            '충북 영동': [36.1748, 127.7834], '영동': [36.1748, 127.7834],
+            '충북 증평': [36.7878, 127.5741], '증평': [36.7878, 127.5741],
+            '충북 청주': [36.6358, 127.4914], '청주': [36.6358, 127.4914],
+            '충북 괴산': [36.8126, 127.7946], '괴산': [36.8126, 127.7946],
+            '충북 제천': [37.1326, 128.2141], '제천': [37.1326, 128.2141],
+            '충북 음성': [36.9402, 127.6907], '음성': [36.9402, 127.6907],
+            '충북 충주': [36.9537, 127.9242], '충주': [36.9537, 127.9242],
+            '충북 단양': [36.9845, 128.3648], '단양': [36.9845, 128.3648],
+            '충북 옥천': [36.3034, 127.5683], '옥천': [36.3034, 127.5683],
+            '충남 논산': [36.2047, 127.0843], '논산': [36.2047, 127.0843],
+            '충남 계룡': [36.2745, 127.2486], '계룡': [36.2745, 127.2486],
+            '충남 천안': [36.8151, 127.1139], '천안': [36.8151, 127.1139],
+            '충남 태안': [36.7456, 126.2974], '태안': [36.7456, 126.2974],
+            '홍성': [36.6012, 126.6608], '금산': [36.1088, 127.4842], '보령': [36.3332, 126.6129],
+
+            // [전라도]
+            '전북 익산': [35.9483, 126.9576], '익산': [35.9483, 126.9576],
+            '전북 임실': [35.6176, 127.2891], '임실': [35.6176, 127.2891],
+            '전북 전주': [35.8242, 127.1480], '전주': [35.8242, 127.1480],
+            '전북 군산': [35.9676, 126.7366], '군산': [35.9676, 126.7366],
+            '전북 완주': [35.9048, 127.1622], '완주': [35.9048, 127.1622],
+            '전북 순창': [35.3744, 127.1374], '순창': [35.3744, 127.1374],
+            '정읍': [35.5699, 126.8586], '남원': [35.4164, 127.3904],
+            '전남 장성': [35.3020, 126.7844], '장성': [35.3020, 126.7844],
+            '전남 목포': [34.8118, 126.3922], '목포': [34.8118, 126.3922],
+            '전남 순천': [34.9506, 127.4872], '순천': [34.9506, 127.4872],
+            '전남 무안': [34.9903, 126.4817], '무안': [34.9903, 126.4817],
+            '전남 나주': [35.0159, 126.7107], '나주': [35.0159, 126.7107],
+            '전남 담양': [35.3212, 126.9881], '담양': [35.3212, 126.9881],
+            '강진': [34.6425, 126.7672],
+
+            // [경상도]
+            '경북 경산': [35.8246, 128.7380], '경산': [35.8246, 128.7380],
+            '경북 영천': [35.9733, 128.9385], '영천': [35.9733, 128.9385],
+            '경북 안동': [36.5684, 128.7294], '안동': [36.5684, 128.7294],
+            '경북 울진': [36.9932, 129.4128], '울진': [36.9932, 129.4128],
+            '경북 경주': [35.8562, 129.2247], '경주': [35.8562, 129.2247],
+            '구미': [36.1194, 128.3443], '봉화': [36.8931, 128.7324],
+            '경남 창원': [35.2281, 128.6811], '창원': [35.2281, 128.6811],
+            '경남 진해': [35.1542, 128.6825], 
+            '경남 함안': [35.2724, 128.4065], '함안': [35.2724, 128.4065],
+            '경남 김해': [35.2341, 128.8809], '김해': [35.2341, 128.8809],
+            '경남 창녕': [35.5446, 128.4921], '창녕': [35.5446, 128.4921],
+            '경남 진주': [35.1802, 128.1076], '진주': [35.1802, 128.1076],
+            '경남 사천': [34.9680, 128.0664], '사천': [34.9680, 128.0664],
+            '경남 고성': [34.9757, 128.3228], '고성(경남)': [34.9757, 128.3228], '고성': [34.9757, 128.3228], '경남고성': [34.9757, 128.3228],
+            '합천': [35.5666, 128.1699]
+        };
+
+        let parsedData = [];
+        let selectedYear = "전체"; // 기본값을 '전체'로 변경합니다.
+        let selectedSeries = "";
+        let map;
+        let markerLayer;
+
+        map = L.map('map').setView([36.25, 127.75], 7);
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+        markerLayer = L.layerGroup().addTo(map);
+
+        function loadStorageData() {
+            try {
+                if (typeof DATA_STORAGE !== 'undefined') {
+                    const actualData = Array.isArray(DATA_STORAGE[0]) ? DATA_STORAGE.flat() : DATA_STORAGE;
+                    processRawStorage(actualData);
+                } else {
+                    throw new Error("data.js 안에서 DATA_STORAGE 변수 객체를 찾을 수 없습니다.");
+                }
+            } catch (error) {
+                document.getElementById('status-message').innerHTML = `<span style="color:#ef4444; font-weight:bold;">⚠️ 로드 에러: ${error.message}</span>`;
+            }
+        }
+
+        function processRawStorage(data) {
+            parsedData = data.map(row => {
+                let year = "미정";
+                if (row['임용예정일']) {
+                    const match = row['임용예정일'].match(/\d{4}/);
+                    if (match) year = match[0];
+                }
+
+                let rawRegion = row['지역'] ? row['지역'].trim() : '';
+                let rawUnit = row['부대'] ? row['부대'].trim() : '';
+                
+                if (rawRegion.includes('사단') || rawRegion.includes('사') || rawRegion.includes('창') || rawRegion.includes('단') || rawRegion.includes('여단')) {
+                    if (!rawUnit) rawUnit = rawRegion; 
+                }
+
+                return {
+                    grade: row['계급'],
+                    series: row['직렬'] ? row['직렬'].trim() : '',
+                    unit: rawUnit,
+                    region: rawRegion,
+                    year: year
+                };
+            }).filter(d => d.series && d.region);
+
+            if(parsedData.length === 0) {
+                document.getElementById('status-message').textContent = "⚠️ 표시할 수 있는 유효 데이터가 없습니다.";
+                return;
+            }
+
+            // 연도 배열 맨 앞에 '전체' 옵션을 추가합니다.
+            const years = ["전체", ...new Set(parsedData.map(d => d.year))].sort((a, b) => {
+                if (a === "전체") return -1;
+                if (b === "전체") return 1;
+                return b - a; // 최신 연도가 위로 오도록 정렬
+            });
+            const seriesList = [...new Set(parsedData.map(d => d.series))].sort();
+
+            selectedYear = "전체"; // 연도 기본값 통합 지정
+            selectedSeries = seriesList.includes("건축") ? "건축" : (seriesList.includes("통신") ? "통신" : seriesList[0]);
+
+            renderFilterButtons('year-container', years, 'year', selectedYear);
+            renderFilterButtons('series-container', seriesList, 'series', selectedSeries);
+
+            updateVisualization();
+        }
+
+        function renderFilterButtons(containerId, list, type, defaultValue) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = "";
+
+            list.forEach(item => {
+                const btn = document.createElement('button');
+                btn.className = `btn-choice ${type}-btn ${item === defaultValue ? 'active' : ''}`;
+                btn.textContent = type === 'year' && item !== '전체' ? item + '년' : item;
+                
+                btn.onclick = () => {
+                    document.querySelectorAll(`.${type}-btn`).forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    if (type === 'year') selectedYear = item;
+                    else selectedSeries = item;
+                    updateVisualization();
+                };
+                container.appendChild(btn);
+            });
+        }
+
+        function updateVisualization() {
+            markerLayer.clearLayers();
+            if (parsedData.length === 0) return;
+
+            // 💡 핵심 변경 항목: selectedYear가 '전체'이면 연도 필터링을 건너뜁니다.
+            const filtered = parsedData.filter(d => {
+                const matchSeries = d.series === selectedSeries;
+                const matchYear = selectedYear === "전체" || d.year === selectedYear;
+                return matchSeries && matchYear;
+            });
+            
+            document.getElementById('stat-filtered-cnt').textContent = filtered.length + '자리';
+            const ratio = ((filtered.length / parsedData.length) * 100).toFixed(1);
+            document.getElementById('stat-ratio').textContent = ratio + '%';
+
+            if (filtered.length === 0) {
+                document.getElementById('status-message').textContent = "조건에 맞는 배치 데이터가 없습니다.";
+                return;
+            }
+
+            const regionGroups = {};
+            filtered.forEach(item => {
+                const reg = item.region;
+                if (!regionGroups[reg]) {
+                    regionGroups[reg] = { count: 0, units: [], years: [] };
+                }
+                regionGroups[reg].count++;
+                if (item.unit) regionGroups[reg].units.push(item.unit);
+                if (item.year) regionGroups[reg].years.push(item.year);
+            });
+
+            const currentBounds = [];
+            let missingRegions = []; 
+
+            Object.keys(regionGroups).forEach(regionName => {
+                const group = regionGroups[regionName];
+                
+                let coords = globalRegionCoordinates[regionName];
+                let matchedByUnit = false;
+                
+                if (!coords) {
+                    const cleanName = regionName.replace(/[^가-힣a-zA-Z0-9]/g, '');
+                    for (const unitKey in unitToRegionCoordinates) {
+                        if (cleanName.includes(unitKey) || unitKey.includes(cleanName)) {
+                            coords = unitToRegionCoordinates[unitKey];
+                            matchedByUnit = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (!coords) {
+                    const cleanName = regionName.replace(/[^가-힣a-zA-Z0-9]/g, '');
+                    for (const key in globalRegionCoordinates) {
+                        const cleanKey = key.replace(/[^가-힣a-zA-Z0-9]/g, '');
+                        if (cleanName.includes(cleanKey) || cleanKey.includes(cleanName)) {
+                            coords = globalRegionCoordinates[key];
+                            break;
+                        }
+                    }
+                }
+
+                let isMissing = false;
+                if (!coords) {
+                    missingRegions.push(regionName);
+                    coords = [36.25, 127.75]; 
+                    isMissing = true;
+                }
+
+                if (coords) {
+                    const finalLat = coords[0] + (Math.random() - 0.5) * 0.03;
+                    const finalLng = coords[1] + (Math.random() - 0.5) * 0.03;
+                    currentBounds.push([finalLat, finalLng]);
+
+                    const percentage = ((group.count / filtered.length) * 100).toFixed(1);
+                    const markerRadius = Math.max(12, Math.min(32, group.count * 4.5));
+
+                    let markerColor = '#2563eb';
+                    let strokeColor = '#1e3a8a';
+                    if (isMissing) {
+                        markerColor = '#f97316';
+                        strokeColor = '#ea580c';
+                    } else if (matchedByUnit) {
+                        markerColor = '#10b981';
+                        strokeColor = '#047857';
+                    }
+
+                    const marker = L.circleMarker([finalLat, finalLng], {
+                        radius: markerRadius,
+                        fillColor: markerColor,
+                        color: strokeColor,
+                        weight: 2,
+                        opacity: 0.9,
+                        fillOpacity: 0.6
+                    });
+
+                    const uniqueUnits = [...new Set(group.units)].slice(0, 4).join(', ');
+                    // 💡 마커 내부 팝업에 포함된 데이터들의 연도 분포도 함께 표시해 줍니다.
+                    const uniqueYears = [...new Set(group.years)].sort().join(', ');
+
+                    const popupContent = `
+                        <div class="custom-popup" style="font-size:13px; line-height:1.5;">
+                            <h3>📍 ${regionName} ${matchedByUnit ? '<span style="color:#10b981;font-size:11px;">(부대명 위치추적)</span>' : ''}</h3>
+                            <div><b>배정 자리 수:</b> <span class="badge">${group.count}개</span></div>
+                            <div><b>선택 조건 내 비율:</b> <b>${percentage}%</b></div>
+                            <div style="font-size:11px; color:#64748b; margin-top:5px; word-break:keep-all;"><b>포함 연도:</b> ${uniqueYears}년</div>
+                            <div style="font-size:11px; color:#64748b; margin-top:2px; word-break:keep-all;"><b>소속 부대:</b> ${uniqueUnits || '정보 없음'}</div>
+                        </div>
+                    `;
+                    marker.bindPopup(popupContent);
+
+                    marker.bindTooltip(`<b>${group.count}자리 (${percentage}%)</b>`, {
+                        permanent: true,
+                        direction: 'top',
+                        className: 'map-tooltip',
+                        offset: [0, -5]
+                    });
+
+                    markerLayer.addLayer(marker);
+                }
+            });
+
+            if (currentBounds.length > 0) {
+                map.fitBounds(currentBounds, { padding: [30, 30], maxZoom: 10 });
+            }
+
+            if (missingRegions.length > 0) {
+                const uniqueMissing = [...new Set(missingRegions)];
+                document.getElementById('status-message').innerHTML = 
+                    `⚠️ 미매칭 발견 (주황색 마커): <span style="color:#ef4444; font-weight:bold;">${uniqueMissing.join(', ')}</span>`;
+            } else {
+                document.getElementById('status-message').innerHTML = `<span style="color:#22c55e;">✅ 전체 데이터 매핑 시각화 성공!</span>`;
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', loadStorageData);
+    </script>
+</body>
+</html>

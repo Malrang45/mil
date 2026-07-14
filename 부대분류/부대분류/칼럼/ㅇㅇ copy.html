@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>7급 군무원 임용 차수 분석</title>
+  <style>
+    :root {
+      --primary: #1e3a8a;
+      --primary-hover: #2563eb;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --border: #e2e8f0;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: "Malgun Gothic", "맑은 고딕", sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      padding: 32px 16px;
+    }
+
+    .wrap {
+      max-width: 1280px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      font-size: 34px;
+      color: var(--primary);
+      margin-bottom: 12px;
+    }
+
+    .sub-text {
+      font-size: 15px;
+      color: var(--text-muted);
+      margin-bottom: 24px;
+      line-height: 1.6;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 10px rgba(15, 23, 42, 0.04);
+    }
+
+    .card h2 {
+      font-size: 18px;
+      margin-bottom: 16px;
+      color: var(--primary);
+    }
+
+    .info-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+
+    .info-chip {
+      background: #eef2ff;
+      color: #3730a3;
+      border-radius: 999px;
+      padding: 6px 12px;
+      font-weight: bold;
+    }
+
+    .filter-row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    select {
+      min-width: 220px;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: #fff;
+      font-size: 14px;
+      color: var(--text-main);
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+    }
+
+    .summary-item {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      background: #f8fbff;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .summary-item:hover {
+      transform: translateY(-2px);
+      border-color: #93c5fd;
+      box-shadow: 0 6px 12px rgba(37, 99, 235, 0.08);
+    }
+
+    .summary-item.active {
+      border-color: var(--primary-hover);
+      background: #eff6ff;
+    }
+
+    .summary-item .label {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    .summary-item .count {
+      font-size: 24px;
+      font-weight: bold;
+      color: var(--primary);
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+      font-size: 14px;
+    }
+
+    th, td {
+      border: 1px solid var(--border);
+      padding: 10px 12px;
+      text-align: left;
+      white-space: nowrap;
+    }
+
+    th {
+      background: #eff6ff;
+      color: var(--primary);
+      font-weight: bold;
+    }
+
+    tr:nth-child(even) td {
+      background: #fcfdff;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 5px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: bold;
+      background: #dbeafe;
+      color: #1d4ed8;
+    }
+
+    .badge.out {
+      background: #fee2e2;
+      color: #b91c1c;
+    }
+
+    .empty {
+      color: var(--text-muted);
+      font-size: 14px;
+      padding: 20px 0;
+      text-align: center;
+    }
+
+    @media (max-width: 768px) {
+      body {
+        padding: 20px 10px;
+      }
+
+      h1 {
+        font-size: 28px;
+      }
+
+      .card {
+        padding: 16px;
+      }
+
+      table {
+        font-size: 13px;
+      }
+
+      th, td {
+        padding: 8px 10px;
+      }
+
+      select {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>7급 군무원 임용 차수 분석</h1>
+    <p class="sub-text">
+      당해 10월 1일 ~ 다음해 9월 30일 기준으로 차수를 나눕니다.
+    </p>
+
+    <div class="card">
+      <h2>기준</h2>
+      <div class="info-bar">
+        <span class="info-chip">당해 10월 1일 ~ 다음해 9월 30일</span>
+        <span class="info-chip">직렬/차수 동시 필터</span>
+        <span class="info-chip">data1.js 기준</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>필터 선택</h2>
+      <div class="filter-row">
+        <select id="roundSelect">
+          <option value="전체">전체 차수</option>
+        </select>
+
+        <select id="seriesSelect">
+          <option value="전체">전체 직렬</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>차수별 집계</h2>
+      <div id="summary" class="summary-grid"></div>
+    </div>
+
+    <div class="card">
+      <h2>상세 목록</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>계급</th>
+              <th>직렬</th>
+              <th>지역</th>
+              <th>부대</th>
+              <th>임용예정일</th>
+              <th>분류</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script src="../data1.js"></script>
+  <script>
+    function parseKoreanDotDate(dateStr) {
+      const clean = String(dateStr || "").trim().replace(/\.$/, "");
+      const parts = clean.split(".");
+      if (parts.length < 3) return null;
+
+      const year = Number(parts[0]);
+      const month = Number(parts[1]);
+      const day = Number(parts[2]);
+
+      if (!year || !month || !day) return null;
+      return { year, month, day };
+    }
+
+    function pad2(num) {
+      return String(num).padStart(2, "0");
+    }
+
+    function getExamYear(dateStr) {
+      const parsed = parseKoreanDotDate(dateStr);
+      if (!parsed) return null;
+
+      const { year, month, day } = parsed;
+      return (month > 10 || (month === 10 && day >= 1)) ? year : year - 1;
+    }
+
+    function getAppointmentBucket(dateStr) {
+      const parsed = parseKoreanDotDate(dateStr);
+      if (!parsed) return null;
+
+      return `${parsed.year}-${pad2(parsed.month)}`;
+    }
+
+    function normalizeSeries(value) {
+      return String(value || "").trim();
+    }
+
+    let sourceData = [];
+
+    if (typeof DATA_STORAGE !== "undefined") {
+      if (Array.isArray(DATA_STORAGE) && Array.isArray(DATA_STORAGE[0])) {
+        sourceData = DATA_STORAGE[0];
+      } else if (Array.isArray(DATA_STORAGE)) {
+        sourceData = DATA_STORAGE;
+      }
+    }
+
+    const grade7Data = sourceData.filter(item =>
+      String(item["계급"] || "").includes("7급")
+    );
+
+    const prepared = grade7Data.map(item => {
+      const parsedDate = parseKoreanDotDate(item["임용예정일"]);
+      const examYear = getExamYear(item["임용예정일"]);
+      const bucket = getAppointmentBucket(item["임용예정일"]);
+      const series = normalizeSeries(item["직렬"]);
+
+      return {
+        ...item,
+        parsedDate,
+        examYear,
+        bucket,
+        series
+      };
+    }).filter(item => item.parsedDate && item.examYear !== null && item.bucket);
+
+    const bucketMapByYear = {};
+    prepared.forEach(item => {
+      if (!bucketMapByYear[item.examYear]) {
+        bucketMapByYear[item.examYear] = new Set();
+      }
+      bucketMapByYear[item.examYear].add(item.bucket);
+    });
+
+    const roundMapByYear = {};
+    Object.keys(bucketMapByYear).forEach(year => {
+      const sortedBuckets = Array.from(bucketMapByYear[year]).sort();
+      roundMapByYear[year] = {};
+
+      sortedBuckets.forEach((bucket, index) => {
+        roundMapByYear[year][bucket] = index + 1;
+      });
+    });
+
+    const processed = prepared.map(item => {
+      const round = roundMapByYear[item.examYear]?.[item.bucket];
+
+      return {
+        ...item,
+        분류: round ? `${item.examYear}-${round}차` : "날짜 오류",
+        badgeClass: round ? "" : "out",
+        sortYear: item.examYear ?? 9999,
+        sortRound: round ?? 999
+      };
+    });
+
+    processed.sort((a, b) => {
+      if (a.sortYear !== b.sortYear) return a.sortYear - b.sortYear;
+      if (a.sortRound !== b.sortRound) return a.sortRound - b.sortRound;
+
+      const aDate = a.parsedDate ? (a.parsedDate.year * 10000 + a.parsedDate.month * 100 + a.parsedDate.day) : 0;
+      const bDate = b.parsedDate ? (b.parsedDate.year * 10000 + b.parsedDate.month * 100 + b.parsedDate.day) : 0;
+
+      return aDate - bDate;
+    });
+
+    const roundSelect = document.getElementById("roundSelect");
+    const seriesSelect = document.getElementById("seriesSelect");
+    const summaryEl = document.getElementById("summary");
+    const tableBody = document.getElementById("tableBody");
+
+    const roundSet = new Set();
+    const seriesSet = new Set();
+
+    processed.forEach(item => {
+      if (item.분류 && item.분류 !== "날짜 오류") roundSet.add(item.분류);
+      if (item.series) seriesSet.add(item.series);
+    });
+
+    const roundOptions = Array.from(roundSet).sort((a, b) => {
+      const aMatch = a.match(/^(\d+)-(\d+)차$/);
+      const bMatch = b.match(/^(\d+)-(\d+)차$/);
+
+      if (!aMatch || !bMatch) return a.localeCompare(b, "ko");
+
+      const aYear = Number(aMatch[1]);
+      const bYear = Number(bMatch[1]);
+      const aRound = Number(aMatch[2]);
+      const bRound = Number(bMatch[2]);
+
+      if (aYear !== bYear) return aYear - bYear;
+      return aRound - bRound;
+    });
+
+    const seriesOptions = Array.from(seriesSet).sort((a, b) => a.localeCompare(b, "ko"));
+
+    roundOptions.forEach(label => {
+      const option = document.createElement("option");
+      option.value = label;
+      option.textContent = label;
+      roundSelect.appendChild(option);
+    });
+
+    seriesOptions.forEach(label => {
+      const option = document.createElement("option");
+      option.value = label;
+      option.textContent = label;
+      seriesSelect.appendChild(option);
+    });
+
+    function getFilteredData() {
+      const selectedRound = roundSelect.value;
+      const selectedSeries = seriesSelect.value;
+
+      return processed.filter(item => {
+        const matchRound = selectedRound === "전체" || item.분류 === selectedRound;
+        const matchSeries = selectedSeries === "전체" || item.series === selectedSeries;
+        return matchRound && matchSeries;
+      });
+    }
+
+    function renderSummary() {
+      summaryEl.innerHTML = "";
+
+      const selectedSeries = seriesSelect.value;
+      let summaryData = processed;
+
+      if (selectedSeries !== "전체") {
+        summaryData = processed.filter(item => item.series === selectedSeries);
+      }
+
+      const counts = {};
+      summaryData.forEach(item => {
+        if (!item.분류 || item.분류 === "날짜 오류") return;
+        counts[item.분류] = (counts[item.분류] || 0) + 1;
+      });
+
+      const entries = Object.entries(counts).sort((a, b) => {
+        const aMatch = a[0].match(/^(\d+)-(\d+)차$/);
+        const bMatch = b[0].match(/^(\d+)-(\d+)차$/);
+
+        if (!aMatch || !bMatch) return a[0].localeCompare(b[0], "ko");
+
+        const aYear = Number(aMatch[1]);
+        const bYear = Number(bMatch[1]);
+        const aRound = Number(aMatch[2]);
+        const bRound = Number(bMatch[2]);
+
+        if (aYear !== bYear) return aYear - bYear;
+        return aRound - bRound;
+      });
+
+      if (entries.length === 0) {
+        summaryEl.innerHTML = '<div class="empty">표시할 데이터가 없습니다.</div>';
+        return;
+      }
+
+      entries.forEach(([label, count]) => {
+        const div = document.createElement("div");
+        div.className = "summary-item";
+
+        if (roundSelect.value === label) {
+          div.classList.add("active");
+        }
+
+        div.innerHTML = `
+          <div class="label">${label}</div>
+          <div class="count">${count}건</div>
+        `;
+
+        div.addEventListener("click", () => {
+          roundSelect.value = label;
+          renderSummary();
+          renderTable();
+        });
+
+        summaryEl.appendChild(div);
+      });
+    }
+
+    function renderTable() {
+      tableBody.innerHTML = "";
+
+      const filtered = getFilteredData();
+
+      if (filtered.length === 0) {
+        tableBody.innerHTML = `
+          <tr>
+            <td colspan="6" class="empty">해당 조건의 데이터가 없습니다.</td>
+          </tr>
+        `;
+        return;
+      }
+
+      filtered.forEach(item => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${item["계급"] ?? ""}</td>
+          <td>${item["직렬"] ?? ""}</td>
+          <td>${item["지역"] ?? ""}</td>
+          <td>${item["부대"] ?? ""}</td>
+          <td>${item["임용예정일"] ?? ""}</td>
+          <td><span class="badge ${item.badgeClass}">${item.분류}</span></td>
+        `;
+        tableBody.appendChild(tr);
+      });
+    }
+
+    roundSelect.addEventListener("change", () => {
+      renderSummary();
+      renderTable();
+    });
+
+    seriesSelect.addEventListener("change", () => {
+      renderSummary();
+      renderTable();
+    });
+
+    renderSummary();
+    renderTable();
+  </script>
+</body>
+</html>

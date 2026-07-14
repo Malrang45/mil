@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>9급 군무원 배정 통계 통합 조회 시스템</title>
+    <style>
+        :root {
+            --primary: #1e3a8a;
+            --primary-hover: #2563eb;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --border: #e2e8f0;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Malgun Gothic', '맑은 고딕', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            padding: 40px 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1000px;
+            width: 100%;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        header h1 {
+            font-size: 28px;
+            color: var(--primary);
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        header p {
+            font-size: 15px;
+            color: var(--text-muted);
+        }
+
+        /* 2x2 그리드 레이아웃 구조 */
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 24px;
+        }
+
+        /* 메뉴 카드 스타일 */
+        .menu-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 30px;
+            text-decoration: none;
+            color: inherit;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            transition: all 0.25s ease;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .menu-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary-hover);
+            box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.1);
+        }
+
+        /* 카드별 아이콘 포인터 */
+        .menu-icon {
+            font-size: 32px;
+            margin-bottom: 5px;
+        }
+
+        .menu-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--text-main);
+            transition: color 0.2s;
+        }
+
+        .menu-card:hover .menu-title {
+            color: var(--primary-hover);
+        }
+
+        .menu-desc {
+            font-size: 13px;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        .arrow-link {
+            font-size: 13px;
+            font-weight: bold;
+            color: var(--primary);
+            margin-top: auto;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .menu-card:hover .arrow-link {
+            color: var(--primary-hover);
+        }
+
+        /* 반응형 모바일 처리 */
+        @media (max-width: 768px) {
+            .menu-grid {
+                grid-template-columns: 1fr;
+            }
+            body {
+                padding: 20px 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>📊 9급 군무원 배정 통계 통합 시스템</h1>
+            <p>ㆍ육통이ㆍ</p>
+        </header>
+
+        <!-- 💡 중요: image_725cc5.png 구조에 맞춰 경로를 '칼럼/파일명.html'로 완벽 지정했습니다. -->
+        <div class="menu-grid">
+            
+            <!-- 카드 1: 역대 근무 지역 -->
+            <a href="칼럼/역대근무지역.html" class="menu-card">
+                <div class="menu-icon">🏢</div>
+                <div class="menu-title">직렬별 역대 근무지 분석</div>
+                <div class="menu-desc">원하는 직렬을 선택하여 역대 어떤 지역과 어떤 부대에 가장 많이 배정되었는지 데이터 순위와 비율 그래프를 한눈에 조회합니다.</div>
+                <div class="arrow-link">바로가기 &rarr;</div>
+            </a>
+
+            <!-- 카드 2: 임용연도, 직렬별 -->
+            <a href="칼럼/임용연도,직렬별.html" class="menu-card">
+                <div class="menu-icon">📅</div>
+                <div class="menu-title">임용연도 ✕ 직렬별 현황</div>
+                <div class="menu-desc">특정 임용 예정 연도와 직렬 두 가지 조건을 교차 필터링하여, 당해 연도 세부 배정 현황(지역 및 부대)을 동시에 비교 분석합니다.</div>
+                <div class="arrow-link">바로가기 &rarr;</div>
+            </a>
+
+            <!-- 카드 3: 전체 데이터 -->
+            <a href="칼럼/전체 데이터.html" class="menu-card">
+                <div class="menu-icon">🔎</div>
+                <div class="menu-title">전체 데이터베이스</div>
+                <div class="menu-desc">Grid.js 기반의 고성능 테이블 컴포넌트를 이용하여 전체 데이터를 실시간으로 고속 검색하고 오름차순/내림차순 정렬 및 정밀 정제합니다.</div>
+                <div class="arrow-link">바로가기 &rarr;</div>
+            </a>
+
+            <!-- 카드 4: 지도 나타내기 -->
+            <a href="칼럼/지도 나타내기.html" class="menu-card">
+                <div class="menu-icon">🗺️</div>
+                <div class="menu-title">전국 부대 배치 시각화 지도</div>
+                <div class="menu-desc">Leaflet 지도 엔진을 결합하여 선택한 연도 및 직렬의 실제 지리적 배정 포지션을 마커와 반경 그래프, 툴팁을 통해 직관적으로 추적합니다.</div>
+                <div class="arrow-link">바로가기 &rarr;</div>
+            </a>
+
+            <!-- 카드 5: 최종점수 계산기 -->
+<a href="칼럼/score.html" class="menu-card">
+    <div class="menu-icon">🧮</div>
+    <div class="menu-title">군무원 최종점수 계산기</div>
+    <div class="menu-desc">필기, 가산점, 면접 등을 반영해 최종점수를 계산하는 score.html 페이지로 이동합니다.</div>
+    <div class="arrow-link">바로가기 &rarr;</div>
+</a>
+
+<a href="칼럼/678급.html" class="menu-card">
+    <div class="menu-icon">🪖</div>
+    <div class="menu-title">7급 군무원 배정 분석</div>
+    <div class="menu-desc">678급 군무원의 배정 현황을 분석하고 시각화합니다.</div>
+    <div class="arrow-link">바로가기 &rarr;</div>
+</a>
+
+<a href="칼럼/ㅇㅇ.html" class="menu-card">
+    <div class="menu-icon">📂</div>
+    <div class="menu-title">차수·직렬 통합 조회</div>
+    <div class="menu-desc">임용 차수와 직렬을 함께 선택하여 9급 군무원 배정 데이터를 조건별로 조회합니다.</div>
+    <div class="arrow-link">바로가기 &rarr;</div>
+</a>
+
+<a href="칼럼/QNA.html" class="menu-card">
+    <div class="menu-icon">📂</div>
+    <div class="menu-title">QNA/주의사항</div>
+    <div class="menu-desc">사이트 이용하면서 궁금한 점?</div>
+    <div class="arrow-link">바로가기 &rarr;</div>
+</a>
+
+        </div>
+    </div>
+
+</body>
+</html>

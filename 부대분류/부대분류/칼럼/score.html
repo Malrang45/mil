@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>군무원 최종점수 계산기</title>
+  <style>
+    :root{
+      --bg:#0b0f14;
+      --panel:#151b23;
+      --panel2:#1d2632;
+      --line:#334154;
+      --text:#eef4fb;
+      --muted:#a8b6c8;
+      --accent:#ffbe55;
+      --accent-strong:#ffd98a;
+      --mint:#52d1b2;
+      --danger:#ff6b6b;
+      --final1:#fff3c9;
+      --final2:#ffd36a;
+      --final3:#ffb11b;
+      --finalText:#2f1b00;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:"Malgun Gothic","Apple SD Gothic Neo",sans-serif;
+      background:linear-gradient(180deg,#0b0f14,#141b25);
+      color:var(--text);
+    }
+    .wrap{
+      max-width:1280px;
+      margin:0 auto;
+      padding:20px;
+    }
+    h1{
+      margin:0 0 8px;
+      font-size:34px;
+    }
+    .desc{
+      margin:0 0 20px;
+      color:var(--muted);
+      font-size:15px;
+      line-height:1.6;
+    }
+    .grid{
+      display:grid;
+      grid-template-columns:1.1fr .9fr;
+      gap:20px;
+      align-items:start;
+    }
+    .card{
+      background:var(--panel);
+      border:1px solid var(--line);
+      border-radius:18px;
+      padding:18px;
+      box-shadow:0 10px 30px rgba(0,0,0,.28);
+    }
+    .card h2{
+      margin:0 0 14px;
+      font-size:21px;
+    }
+    label{
+      display:block;
+      margin:12px 0 6px;
+      font-weight:700;
+    }
+    select,input{
+      width:100%;
+      padding:12px 13px;
+      border-radius:12px;
+      border:1px solid var(--line);
+      background:var(--panel2);
+      color:var(--text);
+      font-size:15px;
+      outline:none;
+    }
+    select:focus,input:focus{
+      border-color:var(--accent);
+      box-shadow:0 0 0 3px rgba(255,190,85,.15);
+    }
+    .row{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+    }
+    .subject-box{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:10px;
+      margin-top:10px;
+    }
+    .subject-chip{
+      background:#10161d;
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:12px;
+    }
+    .small{
+      display:block;
+      color:var(--muted);
+      font-size:12px;
+      margin-bottom:4px;
+    }
+    .btns{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:18px;
+    }
+    button{
+      border:0;
+      border-radius:12px;
+      padding:13px 16px;
+      font-size:15px;
+      font-weight:800;
+      cursor:pointer;
+    }
+    .primary{
+      background:var(--accent);
+      color:#2c1a00;
+    }
+    .secondary{
+      background:#263243;
+      color:var(--text);
+      border:1px solid var(--line);
+    }
+    .result{
+      display:grid;
+      gap:12px;
+    }
+    .result-box{
+      background:#10161d;
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:14px;
+    }
+    .k{
+      color:var(--muted);
+      font-size:12px;
+      margin-bottom:4px;
+    }
+    .v{
+      font-size:24px;
+      font-weight:800;
+    }
+    .ok{color:var(--mint);font-weight:700}
+    .warn{color:var(--danger);font-weight:700}
+    .note,.hint{
+      color:var(--muted);
+      font-size:14px;
+      line-height:1.6;
+    }
+    .note a{
+      color:var(--accent-strong);
+      text-decoration:none;
+      font-weight:700;
+    }
+    .note a:hover{
+      text-decoration:underline;
+    }
+    .pill{
+      display:inline-block;
+      padding:4px 9px;
+      border-radius:999px;
+      background:#243041;
+      color:#dbe8ff;
+      font-size:12px;
+      margin:2px 6px 2px 0;
+      border:1px solid #35507b;
+    }
+    #certPreview{
+      margin-top:10px;
+      line-height:1.8;
+      max-height:180px;
+      overflow:auto;
+      padding-right:4px;
+    }
+    .final-box{
+      background:linear-gradient(135deg,var(--final1),var(--final2) 60%,var(--final3));
+      color:var(--finalText);
+      border:0;
+      box-shadow:0 18px 40px rgba(255,190,85,.28), 0 0 0 2px rgba(255,235,180,.25) inset;
+      padding:22px 18px;
+      border-radius:18px;
+      position:relative;
+      overflow:hidden;
+    }
+    .final-box::after{
+      content:"";
+      position:absolute;
+      top:-30px;
+      right:-20px;
+      width:120px;
+      height:120px;
+      background:rgba(255,255,255,.22);
+      border-radius:50%;
+      filter:blur(2px);
+    }
+    .final-box .k{
+      color:#6f4b00;
+      font-size:13px;
+      font-weight:800;
+      letter-spacing:.3px;
+    }
+    .final-box .v{
+      font-size:46px;
+      font-weight:900;
+      line-height:1.05;
+      margin-top:6px;
+    }
+    .final-sub{
+      margin-top:8px;
+      font-size:13px;
+      color:#6f4b00;
+      font-weight:700;
+    }
+    @media (max-width:960px){
+      .grid,.row,.subject-box{grid-template-columns:1fr}
+      .wrap{padding:14px}
+      h1{font-size:28px}
+      .final-box .v{font-size:38px}
+    }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <h1>군무원 최종점수 계산기</h1>
+  <p class="desc">직렬 선택 → 실제 과목명 자동 변경 → 자격증 가산점 반영 → 면접점수 포함 최종점수 계산</p>
+
+  <div class="grid">
+    <section class="card">
+      <h2>입력</h2>
+
+      <label for="series">직렬 선택</label>
+      <select id="series"></select>
+
+      <div class="subject-box">
+        <div class="subject-chip"><span class="small">과목 1</span><strong id="sub1Name">국어</strong></div>
+        <div class="subject-chip"><span class="small">과목 2</span><strong id="sub2Name">전공1</strong></div>
+        <div class="subject-chip"><span class="small">과목 3</span><strong id="sub3Name">전공2</strong></div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label id="label1" for="score1">국어 점수</label>
+          <input type="number" id="score1" min="0" max="100" step="0.01" placeholder="국어 점수 입력" />
+        </div>
+        <div>
+          <label id="label2" for="score2">전공1 점수</label>
+          <input type="number" id="score2" min="0" max="100" step="0.01" placeholder="전공1 점수 입력" />
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label id="label3" for="score3">전공2 점수</label>
+          <input type="number" id="score3" min="0" max="100" step="0.01" placeholder="전공2 점수 입력" />
+        </div>
+        <div>
+          <label for="interview">면접 점수 (25점 만점)</label>
+          <input type="number" id="interview" min="0" max="25" step="0.01" placeholder="면접 점수 입력" />
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label for="certLevel">자격증 등급</label>
+          <select id="certLevel"></select>
+        </div>
+        <div>
+          <label for="certName">가산 자격증 선택</label>
+          <select id="certName"></select>
+        </div>
+      </div>
+
+      <p class="hint" id="certHint">선택한 직렬에 따라 해당 등급의 자격증 목록이 자동으로 바뀝니다.</p>
+      <div id="certPreview"></div>
+
+      <div class="btns">
+        <button class="primary" onclick="calculate()">최종점수 계산</button>
+        <button class="secondary" onclick="resetForm()">초기화</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>결과</h2>
+      <div class="result">
+        <div class="final-box">
+          <div class="k">최종점수</div>
+          <div class="v" id="finalTotal">-</div>
+          <div class="final-sub">필기 반영점수 + 면접점수 합산</div>
+        </div>
+
+        <div class="result-box">
+          <div class="k">원점수 필기 평균</div>
+          <div class="v" id="rawAvg">-</div>
+        </div>
+
+        <div class="result-box">
+          <div class="k">가산 반영 필기 평균</div>
+          <div class="v" id="writtenAvg">-</div>
+        </div>
+
+        <div class="result-box">
+          <div class="k">면접 점수</div>
+          <div class="v" id="interviewView">-</div>
+        </div>
+
+        <div class="result-box">
+          <div class="k">가산 비율</div>
+          <div class="v" id="bonusRate">-</div>
+        </div>
+
+        <div class="result-box">
+          <div class="k">판정</div>
+          <div id="statusText">-</div>
+        </div>
+
+        <div class="result-box">
+          <div class="k">선택 자격증</div>
+          <div id="selectedCert">-</div>
+        </div>
+
+        <div class="result-box">
+          <div class="k">상세 계산</div>
+          <div id="detailText">-</div>
+        </div>
+      </div>
+
+      <p class="note">
+        <br>
+        <a href="https://malrang45.github.io/mil/%EB%B6%80%EB%8C%80%EB%B6%84%EB%A5%98/" target="_blank" rel="noopener noreferrer">부대분류 사이트</a>
+      </p>
+    </section>
+  </div>
+</div>
+
+<script>
+const subjectMap = {
+  "행정": ["국어", "행정법", "행정학"],
+  "군수": ["국어", "행정법", "경영학"],
+  "수사": ["국어", "형법", "형사소송법"],
+  "사서": ["국어", "자료조직론", "정보봉사론"],
+  "군사정보": ["국어", "국가정보학", "정보사회론"],
+  "기술정보": ["국어", "국가정보학", "정보사회론"],
+  "토목": ["국어", "응용역학", "토목설계"],
+  "건축": ["국어", "건축계획학", "건축구조학"],
+  "시설": ["국어", "냉동공학", "공기조화"],
+  "환경": ["국어", "환경공학", "환경화학"],
+  "전자": ["국어", "전자공학", "전기회로"],
+  "통신": ["국어", "전자공학", "통신공학"],
+  "전기": ["국어", "전기공학", "전기기기"],
+  "지도": ["국어", "지형도학", "측량학"],
+  "영상": ["국어", "사진학", "영상학"],
+  "사이버": ["국어", "네트워크 보안", "정보보호론"],
+  "전산": ["국어", "컴퓨터일반", "정보보호론"],
+  "기상": ["국어", "컴퓨터일반", "전자회로"],
+  "기상예보": ["국어", "일기분석 및 예보법", "기상역학"],
+  "일반기계": ["국어", "기계설계", "기계공작법"],
+  "용접": ["국어", "기계설계", "용접야금"],
+  "금속": ["국어", "금속재료", "주조공학"],
+  "물리분석": ["국어", "금속재료", "비파괴검사"],
+  "화학분석": ["국어", "일반화학", "분석화학"],
+  "유도무기": ["국어", "전자공학", "기계공학"],
+  "총포": ["국어", "전자공학", "기계공학"],
+  "탄약": ["국어", "일반화약학", "화공열역학"],
+  "전차": ["국어", "자동차정비", "자동차공학]"],
+  "차량": ["국어", "자동차정비", "자동차공학"],
+  "인쇄": ["국어", "인쇄공학", "인쇄재료"],
+  "선체": ["국어", "조선공학", "선박일반"],
+  "선거": ["국어", "조선공학", "선박일반"],
+  "함정기관": ["국어", "기관공학", "열역학"],
+  "잠수": ["국어", "잠수이론", "잠수작업"],
+  "기체": ["국어", "항공기기체", "항공기장비"],
+  "항공기관": ["국어", "항공기동력장치", "항공기정비"],
+  "항공보기": ["국어", "항공기체", "항공역학"],
+  "항공지원": ["국어", "항공기체", "항공기장비"],
+  "약무": ["국어", "약제학", "약물학"],
+  "병리": ["국어", "임상병리", "공중보건학"],
+  "방사선": ["국어", "방사선이론과 응용", "영상진단기술학"],
+  "치무": ["국어", "치과보철학", "구강외과학"],
+  "재활치료": ["국어", "물리치료학", "공중보건학"],
+  "의무기록": ["국어", "의무기록관리", "공중보건학"],
+  "의공": ["국어", "전자공학", "의공학"],
+  "영양관리": ["국어", "영양학", "단체급식관리"]
+};
+
+const applicableSeries = [
+  "토목","건축","시설","환경","전기","전자","통신","전산","지도","영상",
+  "일반기계","금속","용접","물리분석","화학분석","유도무기","총포","탄약",
+  "전차","차량","인쇄","선체","선거","함정기관","잠수","기체","항공기관",
+  "항공보기","항공지원","기상","기상예보","의공"
+];
+
+const certData = {
+  "토목": {
+    "기술사": ["토질및기초","토목품질시험","토목구조","항만및해안","도로및공항","토목시공","측량및지형공간정보","수자원개발","상하수도","농어업토목","도시계획","조경","지질및지반","지적","건설안전","철도","교통","광해방지"],
+    "기능장": [],
+    "기사": ["건설재료시험","토목","측량및지형공간정보","도시계획","조경","지적","건설안전","콘크리트","철도토목","응용지질","교통","광해방지"],
+    "산업기사": ["건설재료시험","토목","측량및지형공간정보","건설안전","조경","지적","콘크리트","철도토목","교통"],
+    "기능사": ["건설재료시험","콘크리트","철도토목","석공","측량","전산응용토목제도"]
+  },
+  "건축": {
+    "기술사": ["건축구조","건축기계설비","건축시공","건설안전","건축품질시험","소방","건축사","건축전기설비"],
+    "기능장": ["건축일반시공","건축목재시공"],
+    "기사": ["건축설비","건축","실내건축","건설안전","소방설비(전기분야)","소방설비(기계분야)"],
+    "산업기사": ["건축설비","건축","건축일반시공","건축목공","실내건축","건설안전","방수","소방설비(전기분야)","소방설비(기계분야)"],
+    "기능사": ["전산응용건축제도","타일","미장","조적","온수온돌","유리시공","비계","건축목공","거푸집","금속재창호","건축도장","철근","방수","실내건축","플라스틱창호"]
+  },
+  "시설": {
+    "기술사": ["공조냉동기계","가스","기계안전"],
+    "기능장": ["에너지관리","가스","배관","위험물"],
+    "기사": ["공조냉동기계","에너지관리","가스","산업안전","일반기계"],
+    "산업기사": ["공조냉동기계","에너지관리","가스","배관","산업안전","위험물"],
+    "기능사": ["공조냉동기계","에너지관리","배관","위험물","가스"]
+  },
+  "환경": {
+    "기술사": ["대기관리","수질관리","소음진동","폐기물처리","자연환경관리","토양환경","화공","수자원개발","상하수도","조경","산림","농화학","해양","화공안전","산업위생관리","지질및지반","광해방지","방사선관리","기상예보"],
+    "기능장": [],
+    "기사": ["대기환경","수질환경","소음진동","폐기물처리","자연생태복원","토양환경","생물분류(동물)","생물분류(식물)","화공","조경","산림","식물보호","해양환경","산업위생관리","기상","응용지질","광해방지"],
+    "산업기사": ["대기환경","수질환경","소음진동","폐기물처리","자연생태복원","조경","산림","식물보호","농림토양평가관리","해양조사","산업위생관리"],
+    "기능사": ["조경","산림","환경"]
+  },
+  "전기": {
+    "기술사": ["발송배전","건축전기설비","전기응용","전기안전","철도신호","전기철도","품질관리","소방"],
+    "기능장": ["전기"],
+    "기사": ["전기","전기공사","산업안전","철도신호","전기철도","품질경영","소방설비(전기분야)","승강기"],
+    "산업기사": ["전기","전기공사","산업안전","철도신호","전기철도","품질경영","소방설비(전기분야)","승강기"],
+    "기능사": ["전기","철도전기신호","승강기"]
+  },
+  "전자": {
+    "기술사": ["산업계측제어","전자응용","정보통신","컴퓨터시스템응용","품질관리"],
+    "기능장": ["전자"],
+    "기사": ["전자","반도체설계","정보통신","전파전자통신","무선설비","방송통신","전자계산기","품질경영","메카트로닉스","전자계산기조직응용"],
+    "산업기사": ["전자","전자계산기제어","반도체설계","정보통신","통신선로","정밀측정","전파전자통신","무선설비","방송통신","자동화설비","품질경영"],
+    "기능사": ["자동화설비","전자","전자캐드","전자계산기"]
+  },
+  "통신": {
+    "기술사": ["정보통신","전자응용"],
+    "기능장": ["통신설비","전자"],
+    "기사": ["정보통신","전파전자통신","무선설비","방송통신","전자","반도체설계","정보처리"],
+    "산업기사": ["정보통신","통신선로","전파전자통신","무선설비","방송통신","전자","전자계산기제어","반도체설계","정보처리","사무자동화"],
+    "기능사": ["전자","통신기기","통신선로","무선설비","정보기기운용","전파전자통신","방송통신","정보처리"]
+  },
+  "전산": {
+    "기술사": ["컴퓨터시스템응용","정보관리","정보통신"],
+    "기능장": ["전자계산기","정보처리","전자계산기조직응용"],
+    "기사": ["정보보안","정보통신"],
+    "산업기사": ["전자계산기제어","정보처리","사무자동화"],
+    "기능사": ["정보보안","정보통신"]
+  },
+  "지도": {
+    "기술사": ["지적","측량및지형공간정보"],
+    "기능장": [],
+    "기사": ["지적","측량및지형공간정보"],
+    "산업기사": ["지적","측량및지형공간정보"],
+    "기능사": ["지적","측량","도화","지도제작","항공사진"]
+  },
+  "영상": {
+    "기술사": ["측량및지형공간정보"],
+    "기능장": [],
+    "기사": ["측량및지형공간정보"],
+    "산업기사": ["영사","측량및지형공간정보"],
+    "기능사": ["사진","영사","항공사진"]
+  },
+  "일반기계": {
+    "기술사": ["기계","금형","항공기체","철도차량","공조냉동기계","차량","건설기계","용접","산업기계설비","소방","기계안전","공장관리","품질관리"],
+    "기능장": ["기계가공","금형","판금제관","에너지관리","철도차량정비","용접","자동차정비","배관","건설기계정비"],
+    "기사": ["일반기계","메카트로닉스","프레스금형설계","사출금형설계","항공","항공정비사","공조냉동기계","철도차량","자동차정비","용접","건설기계설비","건설기계정비","승강기","궤도장비정비","농업기계","에너지관리","산업안전","품질경영","소방설비(기계분야)"],
+    "산업기사": ["컴퓨터응용가공","기계조립","자동화설비","기계설계","사출금형","프레스금형","판금제관","항공","공조냉동기계","철도차량","철도운송","자동차정비","건설기계설비","건설기계정비","궤도장비정비","정밀측정","용접","설비보전","농업기계","배관","에너지관리","산업안전","품질경영","영사","승강기","소방설비(기계분야)"],
+    "기능사": ["컴퓨터응용선반","연삭","컴퓨터응용밀링","기계가공조립","기계정비","자동화설비","금형","전산응용기계제도","공유압","판금제관","항공기정비","공조냉동기계","에너지관리","철도차량정비","자동차정비","자동차차체수리","건설기계정비","양화장치운전","궤도장비정비","정밀측정","피복아크용접","이산화탄소가스아크용접","가스텅스텐아크용접","농기계정비","농기계운전","배관","동력기계정비","영사","승강기"]
+  },
+  "금속": {
+    "기술사": ["금속재료","금속가공","금속제련","표면처리","비파괴검사","품질관리"],
+    "기능장": ["금속재료","주조","압연","제선","제강","표면처리"],
+    "기사": ["금속재료","방사선비파괴검사","초음파비파괴검사","자기비파괴검사","침투비파괴검사","와전류비파괴검사","누설비파괴검사","품질경영"],
+    "산업기사": ["금속재료","주조","표면처리","방사선비파괴검사","초음파비파괴검사","자기비파괴검사","침투비파괴검사","품질경영"],
+    "기능사": ["금속재료시험","열처리","주조","원형","압연","제선","축로","제강","표면처리","방사선비파괴검사","초음파비파괴검사","자기비파괴검사","침투비파괴검사"]
+  },
+  "용접": {
+    "기술사": ["용접"],
+    "기능장": ["용접"],
+    "기사": ["용접"],
+    "산업기사": ["용접"],
+    "기능사": ["피복아크용접","이산화탄소가스아크용접","가스텅스텐아크용접"]
+  },
+  "물리분석": {
+    "기술사": ["비파괴검사","금속재료","원자력발전","방사선관리"],
+    "기능장": ["방사선취급감독자면허"],
+    "기사": ["금속재료","방사선비파괴검사","초음파비파괴검사","자기비파괴검사","침투비파괴검사","와전류비파괴검사","누설비파괴검사","전자","원자력","에너지관리","광학"],
+    "산업기사": ["방사성동위원소취급자","금속재료","방사선비파괴검사","초음파비파괴검사","자기비파괴검사","침투비파괴검사","정밀측정","전자","에너지관리"],
+    "기능사": []
+  },
+  "화학분석": {
+    "기술사": ["화공","수질관리","토양환경","방사선관리","방사성동위원소취급자 특수면허","방사선취급감독자면허"],
+    "기능장": ["위험물"],
+    "기사": ["화약류제조","화공","화학분석","수질환경","토양환경","바이오화학제품제조","방사성동위원소취급자 일반면허","원자력"],
+    "산업기사": ["화약류제조","위험물","수질환경","방사선사"],
+    "기능사": ["화학분석","위험물"]
+  },
+  "유도무기": {
+    "기술사": ["산업계측제어","전기응용","전자응용"],
+    "기능장": ["전기","전자"],
+    "기사": ["메카트로닉스","전기","전자","반도체설계","광학","무선설비"],
+    "산업기사": ["자동화설비","정밀측정","전기","전자","광학기기","전자계산기제어","무선설비","반도체설계"],
+    "기능사": ["자동화설비","정밀측정","전자","전기","광학","무선설비"]
+  },
+  "총포": {
+    "기술사": ["기계","산업계측제어","전자응용","화공","화공안전","화약류관리"],
+    "기능장": ["기계가공","전자","위험물"],
+    "기사": ["일반기계","메카트로닉스","전자","화약류제조","화공","화학분석","화약류관리"],
+    "산업기사": ["기계조립","기계설계","설비보전","자동화설비","정밀측정","전자","화약류제조","위험물","화약류관리"],
+    "기능사": ["기계가공조립","전산응용기계제도","기계정비","자동화설비","정밀측정","전자기기"]
+  },
+  "탄약": {
+    "기술사": ["화공","화약류관리","화공안전","산업계측제어","컴퓨터시스템응용","전자응용","전기응용"],
+    "기능장": ["위험물","전자","전기"],
+    "기사": ["화약류제조","화공","화약류관리","화학분석","소방설비(기계분야)","전자","전자계산기","메카트로닉스","무선설비","전기"],
+    "산업기사": ["화약류제조","위험물","화약류관리","전자","소방설비(기계분야)","전자계산기제어","전기","자동화설비","무선설비"],
+    "기능사": ["화학분석","화약취급","위험물"]
+  },
+  "전차": {
+    "기술사": ["차량"],
+    "기능장": ["자동차정비","건설기계정비"],
+    "기사": ["자동차정비","궤도장비정비","건설기계설비","건설기계정비"],
+    "산업기사": ["자동차정비","궤도장비정비","건설기계설비","건설기계정비"],
+    "기능사": ["자동차정비","자동차차체수리","궤도장비정비","건설기계정비","자동차보수도장"]
+  },
+  "차량": {
+    "기술사": ["건설기계","차량","기계","철도차량","용접","금형"],
+    "기능장": ["건설기계정비","자동차정비","기계가공","철도차량정비","용접","금형","판금제관","배관"],
+    "기사": ["건설기계설비","건설기계정비","자동차정비","일반기계","메카트로닉스","철도차량","궤도장비정비","용접","프레스금형","사출금형","산업안전","교통"],
+    "산업기사": ["건설기계설비","건설기계정비","자동차정비","컴퓨터응용가공","기계조립","자동화설비","철도차량","철도운송","치공구설계","정밀측정","용접","프레스금형","사출금형","설비보전","판금제관","배관","산업안전","교통"],
+    "기능사": ["자동차정비","자동차차체수리","건설기계정비","자동차보수도장","컴퓨터응용선반","컴퓨터응용밀링","연삭","기계가공조립","자동화설비","전산응용기계제도","공유압","기중기운전","철도차량정비","굴착기운전","불도저운전","천장크레인운전","로더운전","롤러운전","지게차운전","양화장치운전","궤도장비정비","정밀측정","피복아크용접","이산화탄소가스아크용접","가스텅스텐아크용접","금형","기계정비","판금제관","농기계정비","농기계운전"]
+  },
+  "인쇄": {
+    "기술사": ["인쇄","시각디자인","컬러리스트"],
+    "기능장": ["인쇄","시각디자인","컬러리스트"],
+    "기사": ["인쇄","전자출판","컴퓨터그래픽스운용"],
+    "산업기사": ["인쇄","전자출판","컴퓨터그래픽스운용"],
+    "기능사": ["인쇄","전자출판","컴퓨터그래픽스운용"]
+  },
+  "선체": {
+    "기술사": ["조선","용접"],
+    "기능장": ["판금제관","용접","배관","건축목재시공"],
+    "기사": ["조선선체","조선의장","용접"],
+    "산업기사": ["조선","판금제관","용접","배관","건축목공"],
+    "기능사": ["전산응용조선제도","선체건조","판금제관","동력기계정비","피복아크용접","이산화탄소가스용접","가스텅스텐아크용접","건축목공","배관"]
+  },
+  "선거": {
+    "기술사": ["조선"],
+    "기능장": ["조선선체","조선의장"],
+    "기사": ["조선"],
+    "산업기사": ["금속도장","건축도장","선체건조"],
+    "기능사": []
+  },
+  "함정기관": {
+    "기술사": ["조선","차량","1~2급기관사"],
+    "기능장": ["자동차정비"],
+    "기사": ["조선선체","조선의장","자동차정비","3~4급기관사"],
+    "산업기사": ["조선","자동차정비","5~6급기관사"],
+    "기능사": []
+  },
+  "잠수": {
+    "기술사": ["잠수"],
+    "기능장": ["잠수"],
+    "기사": ["잠수"],
+    "산업기사": ["잠수"],
+    "기능사": ["잠수"]
+  },
+  "기체": {
+    "기술사": ["항공기체","항공기관"],
+    "기능장": ["항공","항공정비사","항공기관사","헬기정비사1급"],
+    "기사": ["항공","헬기정비사2급","항공기관"],
+    "산업기사": ["항공기관"],
+    "기능사": []
+  },
+  "항공기관": {
+    "기술사": ["항공기체","항공기관"],
+    "기능장": ["항공","항공정비사","항공기관사","헬기정비사1급"],
+    "기사": ["항공","헬기정비사2급","항공기관"],
+    "산업기사": ["항공기관"],
+    "기능사": []
+  },
+  "항공보기": {
+    "기술사": ["산업계측제어","항공기관"],
+    "기능장": ["항공","항공정비사","헬기정비사1급"],
+    "기사": ["항공","헬기정비사2급","항공기관"],
+    "산업기사": ["항공기관"],
+    "기능사": []
+  },
+  "항공지원": {
+    "기술사": ["표면처리","금속재료","차량"],
+    "기능장": ["표면처리","금속재료","위험물","자동차정비"],
+    "기사": ["금속재료","항공정비사","침투비파괴검사","화학분석","자동차정비"],
+    "산업기사": ["표면처리","금속재료","위험물","자동차정비","침투비파괴검사"],
+    "기능사": ["금속도장","금속재료시험","표면처리","열처리","위험물","화학분석","침투비파괴검사"]
+  },
+  "기상": {
+    "기술사": ["컴퓨터시스템응용","정보통신"],
+    "기능장": ["전자","통신설비"],
+    "기사": ["전자","전자계산기","반도체설계","정보처리","전자계산기조직응용","정보통신","전파전자통신","무선설비","방송통신"],
+    "산업기사": ["전자","전자계산기제어","정보처리","정보통신","전파전자통신","무선설비","반도체설계","방송통신"],
+    "기능사": []
+  },
+  "기상예보": {
+    "기술사": ["기상예보","지질및지반"],
+    "기능장": [],
+    "기사": ["기상","응용지질"],
+    "산업기사": ["기상감정"],
+    "기능사": []
+  },
+  "의공": {
+    "기술사": ["전자응용"],
+    "기능장": ["전자"],
+    "기사": ["전자","의공"],
+    "산업기사": ["전자","전자계산기제어","의공","의지보조기기사"],
+    "기능사": []
+  }
+};
+
+const bonusRateByLevel = {
+  "없음": 0,
+  "기술사": 5,
+  "기능장": 5,
+  "기사": 5,
+  "산업기사": 5,
+  "기능사": 3
+};
+
+const seriesSelect = document.getElementById('series');
+const certLevel = document.getElementById('certLevel');
+const certName = document.getElementById('certName');
+
+Object.keys(subjectMap).forEach(k => {
+  const o = document.createElement('option');
+  o.value = k;
+  o.textContent = k;
+  seriesSelect.appendChild(o);
+});
+
+["없음","기술사","기능장","기사","산업기사","기능사"].forEach(k => {
+  const o = document.createElement('option');
+  o.value = k;
+  o.textContent = k;
+  certLevel.appendChild(o);
+});
+
+function updateSubjects() {
+  const [a, b, c] = subjectMap[seriesSelect.value];
+  document.getElementById('sub1Name').textContent = a;
+  document.getElementById('sub2Name').textContent = b;
+  document.getElementById('sub3Name').textContent = c;
+
+  document.getElementById('label1').textContent = `${a} 점수`;
+  document.getElementById('label2').textContent = `${b} 점수`;
+  document.getElementById('label3').textContent = `${c} 점수`;
+
+  document.getElementById('score1').placeholder = `${a} 점수 입력`;
+  document.getElementById('score2').placeholder = `${b} 점수 입력`;
+  document.getElementById('score3').placeholder = `${c} 점수 입력`;
+}
+
+function updateCertOptions() {
+  const series = seriesSelect.value;
+  const level = certLevel.value;
+  certName.innerHTML = '';
+  const preview = document.getElementById('certPreview');
+  const hint = document.getElementById('certHint');
+
+  if (!applicableSeries.includes(series)) {
+    const opt = document.createElement('option');
+    opt.value = '';
+    opt.textContent = '가산 비적용 직렬';
+    certName.appendChild(opt);
+    certLevel.value = '없음';
+    certLevel.disabled = true;
+    certName.disabled = true;
+    preview.innerHTML = '<span class="warn">이 직렬은 현재 설정상 가산 대상 직렬이 아닙니다.</span>';
+    hint.textContent = '가산 비적용 직렬입니다.';
+    return;
+  }
+
+  certLevel.disabled = false;
+  certName.disabled = false;
+  hint.textContent = '선택한 직렬에 따라 해당 등급의 자격증 목록이 자동으로 바뀝니다.';
+
+  if (level === '없음') {
+    const opt = document.createElement('option');
+    opt.value = '';
+    opt.textContent = '선택 안 함';
+    certName.appendChild(opt);
+    preview.innerHTML = '<span class="pill">가산점 미선택</span>';
+    return;
+  }
+
+  const list = (certData[series] && certData[series][level]) ? certData[series][level] : [];
+
+  if (!list.length) {
+    const opt = document.createElement('option');
+    opt.value = '';
+    opt.textContent = '해당 등급 자격증 없음';
+    certName.appendChild(opt);
+    preview.innerHTML = '<span class="warn">이 직렬에는 해당 등급 자격증 데이터가 없습니다.</span>';
+    return;
+  }
+
+  list.forEach(name => {
+    const opt = document.createElement('option');
+    opt.value = name;
+    opt.textContent = name;
+    certName.appendChild(opt);
+  });
+
+  preview.innerHTML = list.slice(0, 12).map(v => `<span class="pill">${v}</span>`).join('');
+  if (list.length > 12) {
+    preview.innerHTML += `<div class="hint">외 ${list.length - 12}개 더 있음</div>`;
+  }
+}
+
+function calculate() {
+  const s1 = parseFloat(document.getElementById('score1').value);
+  const s2 = parseFloat(document.getElementById('score2').value);
+  const s3 = parseFloat(document.getElementById('score3').value);
+  const interview = parseFloat(document.getElementById('interview').value);
+
+  if ([s1, s2, s3].some(v => Number.isNaN(v) || v < 0 || v > 100)) {
+    alert('필기 3과목 점수를 0~100 사이로 입력하세요.');
+    return;
+  }
+
+  if (Number.isNaN(interview) || interview < 0 || interview > 25) {
+    alert('면접 점수는 0~25 사이로 입력하세요.');
+    return;
+  }
+
+  const rawAvg = (s1 + s2 + s3) / 3;
+  const pass40 = s1 >= 40 && s2 >= 40 && s3 >= 40;
+  const series = seriesSelect.value;
+  const level = certLevel.value;
+  const cert = certName.value;
+
+  let rate = 0;
+  if (applicableSeries.includes(series) && pass40 && level !== '없음' && cert) {
+    rate = bonusRateByLevel[level] || 0;
+  }
+
+  const f1 = s1 + rate;
+  const f2 = s2 + rate;
+  const f3 = s3 + rate;
+  const writtenAvg = (f1 + f2 + f3) / 3;
+  const interviewPass = interview >= 15;
+  const finalTotal = writtenAvg * 0.75 + interview;
+
+  document.getElementById('rawAvg').textContent = rawAvg.toFixed(2) + '점';
+  document.getElementById('writtenAvg').textContent = writtenAvg.toFixed(2) + '점';
+  document.getElementById('interviewView').textContent = interview.toFixed(2) + '점';
+  document.getElementById('finalTotal').textContent = finalTotal.toFixed(2) + '점';
+  document.getElementById('bonusRate').textContent = rate ? rate + '%' : '0%';
+
+  let status = '';
+  if (!pass40) {
+    status += '<div class="warn">필기 과락(40점 미만 과목 있음)으로 가산 미적용</div>';
+  } else {
+    status += '<div class="ok">필기 과락 없음</div>';
+  }
+
+  if (!interviewPass) {
+    status += '<div class="warn">면접 15점 미만이면 최종 불합격 가능</div>';
+  } else {
+    status += '<div class="ok">면접 기준 충족</div>';
+  }
+  document.getElementById('statusText').innerHTML = status;
+
+  document.getElementById('selectedCert').textContent = cert ? `${series} / ${level} / ${cert}` : '선택 없음';
+
+  const [n1, n2, n3] = subjectMap[series];
+  document.getElementById('detailText').innerHTML =
+    `${n1}: ${s1.toFixed(2)} → ${f1.toFixed(2)}점<br>` +
+    `${n2}: ${s2.toFixed(2)} → ${f2.toFixed(2)}점<br>` +
+    `${n3}: ${s3.toFixed(2)} → ${f3.toFixed(2)}점<br>` +
+    `필기 반영점수: ${writtenAvg.toFixed(2)} × 0.75 = ${(writtenAvg * 0.75).toFixed(2)}점<br>` +
+    `최종점수: ${(writtenAvg * 0.75).toFixed(2)} + ${interview.toFixed(2)} = ${finalTotal.toFixed(2)}점`;
+}
+
+function resetForm() {
+  seriesSelect.value = '전산';
+  document.getElementById('score1').value = '';
+  document.getElementById('score2').value = '';
+  document.getElementById('score3').value = '';
+  document.getElementById('interview').value = '';
+  certLevel.value = '없음';
+
+  updateSubjects();
+  updateCertOptions();
+
+  document.getElementById('rawAvg').textContent = '-';
+  document.getElementById('writtenAvg').textContent = '-';
+  document.getElementById('interviewView').textContent = '-';
+  document.getElementById('finalTotal').textContent = '-';
+  document.getElementById('bonusRate').textContent = '-';
+  document.getElementById('statusText').textContent = '-';
+  document.getElementById('selectedCert').textContent = '-';
+  document.getElementById('detailText').textContent = '-';
+}
+
+seriesSelect.addEventListener('change', () => {
+  updateSubjects();
+  updateCertOptions();
+});
+certLevel.addEventListener('change', updateCertOptions);
+
+seriesSelect.value = '전산';
+certLevel.value = '없음';
+updateSubjects();
+updateCertOptions();
+</script>
+</body>
+</html>

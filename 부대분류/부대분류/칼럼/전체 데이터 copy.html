@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>9급 군무원 통합 조회 시스템</title>
+    
+    <link href="https://unpkg.com/gridjs/dist/theme/mermaid.min.css" rel="stylesheet" />
+    <script src="https://unpkg.com/gridjs/dist/gridjs.umd.js"></script>
+    
+    <!-- 💡 상위 폴더(../)에 있는 data.js 파일을 안전하게 로드합니다. -->
+    <script src="../data1.js" defer></script>
+    
+    <style>
+        body {
+            font-family: 'Malgun Gothic', '맑은 고딕', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        h2 {
+            margin-top: 0;
+            color: #333;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+        }
+        #error-message {
+            color: #d9534f;
+            background-color: #f2dede;
+            border: 1px solid #ebccd1;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>📊 9급 군무원 통합 조회</h2>
+        
+        <div id="error-message"></div>
+        
+        <div id="wrapper"></div>
+    </div>
+
+    <script>
+        // 고정할 Grid.js 테이블 헤더 순서
+        const headers = ["계급", "직렬", "지역", "부대", "임용예정일"];
+
+        // 💡 DATA_STORAGE 변수를 가공하여 Grid.js 포맷으로 변환하는 로직
+        function loadGridData() {
+            const errorDiv = document.getElementById('error-message');
+            try {
+                // DATA_STORAGE 변수가 선언되어 있는지 체크
+                if (typeof DATA_STORAGE !== 'undefined') {
+                    // 2차원 배열 구조 대응
+                    const actualData = Array.isArray(DATA_STORAGE[0]) ? DATA_STORAGE[0] : DATA_STORAGE;
+                    
+                    // JSON 객체 배열을 Grid.js가 인식할 수 있는 2차원 배열 형태로 정제
+                    const gridData = actualData.map(row => {
+                        return [
+                            row["계급"] ? row["계급"].trim() : "",
+                            row["직렬"] ? row["직렬"].trim() : "",
+                            row["지역"] ? row["지역"].trim() : "",
+                            row["부대"] ? row["부대"].trim() : "",
+                            row["임용예정일"] ? row["임용예정일"].trim() : ""
+                        ];
+                    });
+
+                    // 테이블 렌더링 시작
+                    renderTable(headers, gridData);
+                } else {
+                    throw new Error("data.js 파일 경로를 찾지 못했거나 변수(DATA_STORAGE) 선언을 찾을 수 없습니다.");
+                }
+            } catch (error) {
+                console.error("오류 발생:", error);
+                errorDiv.style.display = "block";
+                errorDiv.innerHTML = `<strong>⚠️ 데이터 로드 실패:</strong> ${error.message}<br><small style="color:#666;">파일 배치 구조와 변수명을 다시 한 번 점검해 주세요.</small>`;
+            }
+        }
+
+        // Grid.js 라이브러리를 통해 화면에 테이블을 렌더링하는 함수
+        function renderTable(headers, data) {
+            new gridjs.Grid({
+                columns: headers, 
+                data: data,       
+                search: true,     // 실시간 검색 기능 활성화
+                sort: true,       // 컬럼 클릭 시 정렬 기능 활성화
+                resizable: true,  // 컬럼 너비 조절 가능
+                pagination: {
+                    limit: 30     // 한 페이지에 30개씩 페이징 처리
+                },
+                language: {
+                    'search': { 'placeholder': '검색어를 입력하세요...' },
+                    'pagination': {
+                        'previous': '이전',
+                        'next': '다음',
+                        'showing': '보여주는 중',
+                        'results': () => '개의 기록'
+                    }
+                }
+            }).render(document.getElementById("wrapper"));
+        }
+
+        // HTML 렌더링 및 스크립트(defer)가 모두 준비된 시점에 실행
+        window.addEventListener('DOMContentLoaded', loadGridData);
+    </script>
+</body>
+</html>
