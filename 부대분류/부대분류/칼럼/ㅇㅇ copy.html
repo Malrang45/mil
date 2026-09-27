@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>7급 군무원 임용 차수 분석</title>
+
   <style>
     :root {
       --primary: #1e3a8a;
@@ -151,7 +152,8 @@
       font-size: 14px;
     }
 
-    th, td {
+    th,
+    td {
       border: 1px solid var(--border);
       padding: 10px 12px;
       text-align: left;
@@ -207,7 +209,8 @@
         font-size: 13px;
       }
 
-      th, td {
+      th,
+      td {
         padding: 8px 10px;
       }
 
@@ -215,28 +218,163 @@
         width: 100%;
       }
     }
+    /* ===== 상단 공통 헤더 ===== */
+
+.site-top-header {
+    width: 100%;
+    background: #ffffff;
+    border-bottom: 1px solid var(--border);
+    border-radius: 12px;
+    margin-bottom: 30px;
+}
+
+.site-top-inner {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 16px 20px;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+}
+
+.site-logo {
+    color: var(--primary);
+    font-size: 17px;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.site-nav {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.site-nav a {
+    color: var(--text-muted);
+    font-size: 14px;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.site-nav a:hover {
+    color: var(--primary-hover);
+}
+
+
+/* ===== 하단 푸터 ===== */
+
+.site-footer {
+    width: 100%;
+    background: #ffffff;
+    border-top: 1px solid var(--border);
+    border-radius: 12px;
+    margin-top: 30px;
+}
+
+.site-footer-inner {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 24px 20px;
+    text-align: center;
+}
+
+.footer-text {
+    color: var(--text-muted);
+    font-size: 13px;
+    margin-bottom: 5px;
+}
+
+.footer-notice {
+    color: var(--text-muted);
+    font-size: 12px;
+}
+
+
+/* ===== 모바일 ===== */
+
+@media (max-width: 768px) {
+    .site-top-inner {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .site-nav {
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 14px;
+    }
+}
   </style>
 </head>
+
 <body>
+
+  <!-- ===== 상단 공통 헤더 ===== -->
+  <div class="site-top-header">
+    <div class="site-top-inner">
+
+      <a href="678급.html" class="site-logo">
+        🪖 7급 군무원 배정정보
+      </a>
+
+      <nav class="site-nav">
+        <a href="678급.html">홈</a>
+        <a href="역대근무지역 copy.html">직렬별</a>
+        <a href="ㅇㅇ copy.html">차수별</a>
+        <a href="지도 나타내기 copy.html">지도 보기</a>
+        <a href="QNA.html">QNA</a>
+
+        <a href="https://gall.dcinside.com/mgallery/board/view?id=soider&amp;no=952492"
+           target="_blank"
+           rel="noopener noreferrer">사용법</a>
+
+        <a href="https://m-recruit.mnd.go.kr/?w2xPath=/ui/ts/common/layout/index.xml"
+           target="_blank"
+           rel="noopener noreferrer">국방 포털</a>
+      </nav>
+
+    </div>
+  </div>
+
+
   <div class="wrap">
-    <h1>7급 군무원 임용 차수 분석</h1>
+
+    <!-- 최신 임용예정일이 자동으로 제목에 들어감 -->
+    <h1 id="page-title">7급 군무원 임용 차수 분석</h1>
+
     <p class="sub-text">
-      data1.js의 전체 데이터를 대상으로, 임용예정일 기준으로 차수를 자동 분류합니다.
-      연도 기준은 당해 12월 1일부터 다음해 11월 30일까지이며,
-      실제 임용예정일 데이터가 존재하는 월에만 차수가 1씩 증가합니다.
     </p>
 
+
+    <!-- 기준 -->
     <div class="card">
       <h2>기준</h2>
+
       <div class="info-bar">
-        <span class="info-chip">당해 12월 1일 ~ 다음해 11월 30일</span>
-        <span class="info-chip">수정완료 (2026-07-18)</span>
+        <span class="info-chip">
+          당해 12월 1일 ~ 다음해 11월 30일
+        </span>
+
+        <!-- 최신 임용예정일 자동 표시 -->
+        <span
+          class="info-chip"
+          id="latest-update-date"
+        >
+          수정완료
+        </span>
       </div>
     </div>
 
+
+    <!-- 필터 -->
     <div class="card">
       <h2>필터 선택</h2>
+
       <div class="filter-row">
+
         <select id="roundSelect">
           <option value="전체">전체 차수</option>
         </select>
@@ -244,18 +382,30 @@
         <select id="seriesSelect">
           <option value="전체">전체 직렬</option>
         </select>
+
       </div>
     </div>
 
+
+    <!-- 차수별 집계 -->
     <div class="card">
       <h2>차수별 집계</h2>
-      <div id="summary" class="summary-grid"></div>
+
+      <div
+        id="summary"
+        class="summary-grid"
+      ></div>
     </div>
 
+
+    <!-- 상세 목록 -->
     <div class="card">
       <h2>상세 목록</h2>
+
       <div class="table-wrap">
+
         <table>
+
           <thead>
             <tr>
               <th>직렬</th>
@@ -265,272 +415,1095 @@
               <th>분류</th>
             </tr>
           </thead>
+
           <tbody id="tableBody"></tbody>
+
         </table>
+
       </div>
     </div>
+
   </div>
 
+
+  <!-- ===== 하단 푸터 ===== -->
+  <footer class="site-footer">
+    <div class="site-footer-inner">
+
+      <div class="footer-text">
+         ©ㆍ육통이ㆍ
+      </div>
+
+      <div class="footer-notice">
+        본 사이트의 데이터는 참고용이며 실제 인사 결과와 다를 수 있습니다.
+      </div>
+
+    </div>
+  </footer>
+
+
+  <!--
+    7급 데이터
+
+    현재 HTML이 칼럼 폴더에 있고
+    data1.js가 그 상위 폴더에 있으므로
+    ../data1.js
+  -->
+
   <script src="../data1.js"></script>
+
+
   <script>
+
+    /* ================================
+       날짜 처리
+    ================================= */
+
     function parseKoreanDotDate(dateStr) {
-      const clean = String(dateStr || "").trim().replace(/\.$/, "");
+
+      const clean = String(dateStr || "")
+        .trim()
+        .replace(/\.$/, "");
+
       const parts = clean.split(".");
-      if (parts.length < 3) return null;
+
+      if (parts.length < 3) {
+        return null;
+      }
 
       const year = Number(parts[0]);
       const month = Number(parts[1]);
       const day = Number(parts[2]);
 
-      if (!year || !month || !day) return null;
-      return { year, month, day };
+      if (!year || !month || !day) {
+        return null;
+      }
+
+      /*
+       * 잘못된 날짜 방지
+       * 예: 202022.12.12
+       */
+      if (
+        year < 2000 ||
+        year > 2100 ||
+        month < 1 ||
+        month > 12 ||
+        day < 1 ||
+        day > 31
+      ) {
+        return null;
+      }
+
+      return {
+        year,
+        month,
+        day
+      };
     }
+
 
     function pad2(num) {
       return String(num).padStart(2, "0");
     }
 
-    function getExamYear(dateStr) {
-      const parsed = parseKoreanDotDate(dateStr);
-      if (!parsed) return null;
 
-      const { year, month, day } = parsed;
-      return (month === 12 && day >= 1) ? year : year - 1;
+    function getExamYear(dateStr) {
+
+      const parsed =
+        parseKoreanDotDate(dateStr);
+
+      if (!parsed) {
+        return null;
+      }
+
+      const {
+        year,
+        month,
+        day
+      } = parsed;
+
+      /*
+       * 12월 1일 ~ 12월 31일
+       * => 해당 연도
+       *
+       * 1월 1일 ~ 11월 30일
+       * => 전년도
+       */
+      return (
+        month === 12 &&
+        day >= 1
+      )
+        ? year
+        : year - 1;
     }
 
+
     function getAppointmentBucket(dateStr) {
-      const parsed = parseKoreanDotDate(dateStr);
-      if (!parsed) return null;
+
+      const parsed =
+        parseKoreanDotDate(dateStr);
+
+      if (!parsed) {
+        return null;
+      }
 
       return `${parsed.year}-${pad2(parsed.month)}`;
     }
+
 
     function normalizeSeries(value) {
       return String(value || "").trim();
     }
 
+
+
+    /* ================================
+       data1.js 불러오기
+    ================================= */
+
     let sourceData = [];
 
+
     if (typeof DATA_STORAGE !== "undefined") {
-      if (Array.isArray(DATA_STORAGE) && Array.isArray(DATA_STORAGE[0])) {
-        sourceData = DATA_STORAGE.flat();
-      } else if (Array.isArray(DATA_STORAGE)) {
-        sourceData = DATA_STORAGE;
+
+      if (
+        Array.isArray(DATA_STORAGE) &&
+        Array.isArray(DATA_STORAGE[0])
+      ) {
+
+        sourceData =
+          DATA_STORAGE.flat();
+
+      } else if (
+        Array.isArray(DATA_STORAGE)
+      ) {
+
+        sourceData =
+          DATA_STORAGE;
+
       }
     }
 
-    const prepared = sourceData.map(item => {
-      const parsedDate = parseKoreanDotDate(item["임용예정일"]);
-      const examYear = getExamYear(item["임용예정일"]);
-      const bucket = getAppointmentBucket(item["임용예정일"]);
-      const series = normalizeSeries(item["직렬"]);
 
-      return {
-        ...item,
-        parsedDate,
-        examYear,
-        bucket,
-        series
-      };
-    }).filter(item => item.parsedDate && item.examYear !== null && item.bucket);
 
-    const bucketMapByYear = {};
-    prepared.forEach(item => {
-      if (!bucketMapByYear[item.examYear]) {
-        bucketMapByYear[item.examYear] = new Set();
-      }
-      bucketMapByYear[item.examYear].add(item.bucket);
-    });
+    /* ================================
+       가장 최신 임용예정일 찾기
+    ================================= */
 
-    const roundMapByYear = {};
-    Object.keys(bucketMapByYear).forEach(year => {
-      const sortedBuckets = Array.from(bucketMapByYear[year]).sort();
-      roundMapByYear[year] = {};
+    function showLatestDate() {
 
-      sortedBuckets.forEach((bucket, index) => {
-        roundMapByYear[year][bucket] = index + 1;
-      });
-    });
+      let latest = null;
 
-    const processed = prepared.map(item => {
-      const round = roundMapByYear[item.examYear]?.[item.bucket];
 
-      return {
-        ...item,
-        분류: round ? `${item.examYear}-${round}차` : "날짜 오류",
-        badgeClass: round ? "" : "out",
-        sortYear: item.examYear ?? 9999,
-        sortRound: round ?? 999
-      };
-    });
+      sourceData.forEach(item => {
 
-    processed.sort((a, b) => {
-      if (a.sortYear !== b.sortYear) return a.sortYear - b.sortYear;
-      if (a.sortRound !== b.sortRound) return a.sortRound - b.sortRound;
-
-      const aDate = a.parsedDate
-        ? (a.parsedDate.year * 10000 + a.parsedDate.month * 100 + a.parsedDate.day)
-        : 0;
-      const bDate = b.parsedDate
-        ? (b.parsedDate.year * 10000 + b.parsedDate.month * 100 + b.parsedDate.day)
-        : 0;
-
-      return aDate - bDate;
-    });
-
-    const roundSelect = document.getElementById("roundSelect");
-    const seriesSelect = document.getElementById("seriesSelect");
-    const summaryEl = document.getElementById("summary");
-    const tableBody = document.getElementById("tableBody");
-
-    const roundSet = new Set();
-    const seriesSet = new Set();
-
-    processed.forEach(item => {
-      if (item.분류 && item.분류 !== "날짜 오류") roundSet.add(item.분류);
-      if (item.series) seriesSet.add(item.series);
-    });
-
-    const roundOptions = Array.from(roundSet).sort((a, b) => {
-      const aMatch = a.match(/^(\d+)-(\d+)차$/);
-      const bMatch = b.match(/^(\d+)-(\d+)차$/);
-
-      if (!aMatch || !bMatch) return a.localeCompare(b, "ko");
-
-      const aYear = Number(aMatch[1]);
-      const bYear = Number(bMatch[1]);
-      const aRound = Number(aMatch[2]);
-      const bRound = Number(bMatch[2]);
-
-      if (aYear !== bYear) return aYear - bYear;
-      return aRound - bRound;
-    });
-
-    const seriesOptions = Array.from(seriesSet).sort((a, b) => a.localeCompare(b, "ko"));
-
-    roundOptions.forEach(label => {
-      const option = document.createElement("option");
-      option.value = label;
-      option.textContent = label;
-      roundSelect.appendChild(option);
-    });
-
-    seriesOptions.forEach(label => {
-      const option = document.createElement("option");
-      option.value = label;
-      option.textContent = label;
-      seriesSelect.appendChild(option);
-    });
-
-    function getFilteredData() {
-      const selectedRound = roundSelect.value;
-      const selectedSeries = seriesSelect.value;
-
-      return processed.filter(item => {
-        const matchRound = selectedRound === "전체" || item.분류 === selectedRound;
-        const matchSeries = selectedSeries === "전체" || item.series === selectedSeries;
-        return matchRound && matchSeries;
-      });
-    }
-
-    function renderSummary() {
-      summaryEl.innerHTML = "";
-
-      const selectedSeries = seriesSelect.value;
-      let summaryData = processed;
-
-      if (selectedSeries !== "전체") {
-        summaryData = processed.filter(item => item.series === selectedSeries);
-      }
-
-      const counts = {};
-      summaryData.forEach(item => {
-        if (!item.분류 || item.분류 === "날짜 오류") return;
-        counts[item.분류] = (counts[item.분류] || 0) + 1;
-      });
-
-      const entries = Object.entries(counts).sort((a, b) => {
-        const aMatch = a[0].match(/^(\d+)-(\d+)차$/);
-        const bMatch = b[0].match(/^(\d+)-(\d+)차$/);
-
-        if (!aMatch || !bMatch) return a[0].localeCompare(b[0], "ko");
-
-        const aYear = Number(aMatch[1]);
-        const bYear = Number(bMatch[1]);
-        const aRound = Number(aMatch[2]);
-        const bRound = Number(bMatch[2]);
-
-        if (aYear !== bYear) return aYear - bYear;
-        return aRound - bRound;
-      });
-
-      if (entries.length === 0) {
-        summaryEl.innerHTML = '<div class="empty">표시할 데이터가 없습니다.</div>';
-        return;
-      }
-
-      entries.forEach(([label, count]) => {
-        const div = document.createElement("div");
-        div.className = "summary-item";
-
-        if (roundSelect.value === label) {
-          div.classList.add("active");
+        if (!item) {
+          return;
         }
 
-        div.innerHTML = `
-          <div class="label">${label}</div>
-          <div class="count">${count}건</div>
-        `;
 
-        div.addEventListener("click", () => {
-          roundSelect.value = roundSelect.value === label ? "전체" : label;
-          renderSummary();
-          renderTable();
-        });
+        const parsed =
+          parseKoreanDotDate(
+            item["임용예정일"]
+          );
 
-        summaryEl.appendChild(div);
+
+        if (!parsed) {
+          return;
+        }
+
+
+        /*
+         * 날짜를 숫자로 변환
+         *
+         * 2026.10.01
+         * ↓
+         * 20261001
+         */
+        const value =
+          parsed.year * 10000 +
+          parsed.month * 100 +
+          parsed.day;
+
+
+        if (
+          !latest ||
+          value > latest.value
+        ) {
+
+          latest = {
+            value,
+            year: parsed.year,
+            month: parsed.month,
+            day: parsed.day
+          };
+
+        }
+
       });
-    }
 
-    function renderTable() {
-      tableBody.innerHTML = "";
 
-      const filtered = getFilteredData();
-
-      if (filtered.length === 0) {
-        tableBody.innerHTML = `
-          <tr>
-            <td colspan="5" class="empty">해당 조건의 데이터가 없습니다.</td>
-          </tr>
-        `;
+      /*
+       * 정상적인 날짜가 없으면
+       * 기본 제목 유지
+       */
+      if (!latest) {
         return;
       }
 
-      filtered.forEach(item => {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>${item["직렬"] ?? ""}</td>
-          <td>${item["지역"] ?? ""}</td>
-          <td>${item["부대"] ?? ""}</td>
-          <td>${item["임용예정일"] ?? ""}</td>
-          <td><span class="badge ${item.badgeClass}">${item.분류}</span></td>
-        `;
-        tableBody.appendChild(tr);
-      });
+
+      const year =
+        latest.year;
+
+      const month =
+        pad2(latest.month);
+
+      const day =
+        pad2(latest.day);
+
+
+
+      /* ================================
+         제목 날짜 변경
+      ================================= */
+
+      const pageTitle =
+        document.getElementById(
+          "page-title"
+        );
+
+
+      if (pageTitle) {
+
+        pageTitle.textContent =
+          `7급 군무원 임용 차수 분석 ${year}.${month}.${day}. 업뎃`;
+
+      }
+
+
+
+      /* ================================
+         수정완료 날짜 변경
+      ================================= */
+
+      const latestDateEl =
+        document.getElementById(
+          "latest-update-date"
+        );
+
+
+      if (latestDateEl) {
+
+        latestDateEl.textContent =
+          `수정완료 (${year}-${month}-${day})`;
+
+      }
+
     }
 
-    roundSelect.addEventListener("change", () => {
-      renderSummary();
-      renderTable();
+
+    /*
+     * 최신 날짜 표시 실행
+     */
+    showLatestDate();
+
+
+
+    /* ================================
+       차수 계산
+    ================================= */
+
+    const prepared =
+      sourceData
+        .map(item => {
+
+          const parsedDate =
+            parseKoreanDotDate(
+              item["임용예정일"]
+            );
+
+          const examYear =
+            getExamYear(
+              item["임용예정일"]
+            );
+
+          const bucket =
+            getAppointmentBucket(
+              item["임용예정일"]
+            );
+
+          const series =
+            normalizeSeries(
+              item["직렬"]
+            );
+
+
+          return {
+            ...item,
+            parsedDate,
+            examYear,
+            bucket,
+            series
+          };
+
+        })
+        .filter(item =>
+          item.parsedDate &&
+          item.examYear !== null &&
+          item.bucket
+        );
+
+
+
+    /* ================================
+       연도별 실제 임용월 수집
+    ================================= */
+
+    const bucketMapByYear = {};
+
+
+    prepared.forEach(item => {
+
+      if (
+        !bucketMapByYear[
+          item.examYear
+        ]
+      ) {
+
+        bucketMapByYear[
+          item.examYear
+        ] = new Set();
+
+      }
+
+
+      bucketMapByYear[
+        item.examYear
+      ].add(
+        item.bucket
+      );
+
     });
 
-    seriesSelect.addEventListener("change", () => {
-      renderSummary();
-      renderTable();
+
+
+    /* ================================
+       차수 생성
+    ================================= */
+
+    const roundMapByYear = {};
+
+
+    Object.keys(
+      bucketMapByYear
+    ).forEach(year => {
+
+      const sortedBuckets =
+        Array.from(
+          bucketMapByYear[year]
+        ).sort();
+
+
+      roundMapByYear[year] = {};
+
+
+      sortedBuckets.forEach(
+        (bucket, index) => {
+
+          roundMapByYear[
+            year
+          ][bucket] =
+            index + 1;
+
+        }
+      );
+
     });
+
+
+
+    /* ================================
+       최종 데이터 가공
+    ================================= */
+
+    const processed =
+      prepared.map(item => {
+
+        const round =
+          roundMapByYear[
+            item.examYear
+          ]?.[
+            item.bucket
+          ];
+
+
+        return {
+
+          ...item,
+
+          분류: round
+            ? `${item.examYear}-${round}차`
+            : "날짜 오류",
+
+          badgeClass:
+            round
+              ? ""
+              : "out",
+
+          sortYear:
+            item.examYear ?? 9999,
+
+          sortRound:
+            round ?? 999
+
+        };
+
+      });
+
+
+
+    /* ================================
+       데이터 정렬
+    ================================= */
+
+    processed.sort(
+      (a, b) => {
+
+        if (
+          a.sortYear !==
+          b.sortYear
+        ) {
+
+          return (
+            a.sortYear -
+            b.sortYear
+          );
+
+        }
+
+
+        if (
+          a.sortRound !==
+          b.sortRound
+        ) {
+
+          return (
+            a.sortRound -
+            b.sortRound
+          );
+
+        }
+
+
+        const aDate =
+          a.parsedDate
+            ? (
+                a.parsedDate.year * 10000 +
+                a.parsedDate.month * 100 +
+                a.parsedDate.day
+              )
+            : 0;
+
+
+        const bDate =
+          b.parsedDate
+            ? (
+                b.parsedDate.year * 10000 +
+                b.parsedDate.month * 100 +
+                b.parsedDate.day
+              )
+            : 0;
+
+
+        return (
+          aDate -
+          bDate
+        );
+
+      }
+    );
+
+
+
+    /* ================================
+       HTML 요소
+    ================================= */
+
+    const roundSelect =
+      document.getElementById(
+        "roundSelect"
+      );
+
+    const seriesSelect =
+      document.getElementById(
+        "seriesSelect"
+      );
+
+    const summaryEl =
+      document.getElementById(
+        "summary"
+      );
+
+    const tableBody =
+      document.getElementById(
+        "tableBody"
+      );
+
+
+
+    /* ================================
+       필터 데이터 생성
+    ================================= */
+
+    const roundSet =
+      new Set();
+
+    const seriesSet =
+      new Set();
+
+
+    processed.forEach(item => {
+
+      if (
+        item.분류 &&
+        item.분류 !== "날짜 오류"
+      ) {
+
+        roundSet.add(
+          item.분류
+        );
+
+      }
+
+
+      if (item.series) {
+
+        seriesSet.add(
+          item.series
+        );
+
+      }
+
+    });
+
+
+
+    /* ================================
+       차수 옵션 정렬
+    ================================= */
+
+    const roundOptions =
+      Array.from(
+        roundSet
+      ).sort(
+        (a, b) => {
+
+          const aMatch =
+            a.match(
+              /^(\d+)-(\d+)차$/
+            );
+
+          const bMatch =
+            b.match(
+              /^(\d+)-(\d+)차$/
+            );
+
+
+          if (
+            !aMatch ||
+            !bMatch
+          ) {
+
+            return a.localeCompare(
+              b,
+              "ko"
+            );
+
+          }
+
+
+          const aYear =
+            Number(
+              aMatch[1]
+            );
+
+          const bYear =
+            Number(
+              bMatch[1]
+            );
+
+          const aRound =
+            Number(
+              aMatch[2]
+            );
+
+          const bRound =
+            Number(
+              bMatch[2]
+            );
+
+
+          if (
+            aYear !==
+            bYear
+          ) {
+
+            return (
+              aYear -
+              bYear
+            );
+
+          }
+
+
+          return (
+            aRound -
+            bRound
+          );
+
+        }
+      );
+
+
+
+    /* ================================
+       직렬 옵션 정렬
+    ================================= */
+
+    const seriesOptions =
+      Array.from(
+        seriesSet
+      ).sort(
+        (a, b) =>
+          a.localeCompare(
+            b,
+            "ko"
+          )
+      );
+
+
+
+    /* ================================
+       차수 SELECT 추가
+    ================================= */
+
+    roundOptions.forEach(
+      label => {
+
+        const option =
+          document.createElement(
+            "option"
+          );
+
+        option.value =
+          label;
+
+        option.textContent =
+          label;
+
+        roundSelect.appendChild(
+          option
+        );
+
+      }
+    );
+
+
+
+    /* ================================
+       직렬 SELECT 추가
+    ================================= */
+
+    seriesOptions.forEach(
+      label => {
+
+        const option =
+          document.createElement(
+            "option"
+          );
+
+        option.value =
+          label;
+
+        option.textContent =
+          label;
+
+        seriesSelect.appendChild(
+          option
+        );
+
+      }
+    );
+
+
+
+    /* ================================
+       필터링
+    ================================= */
+
+    function getFilteredData() {
+
+      const selectedRound =
+        roundSelect.value;
+
+      const selectedSeries =
+        seriesSelect.value;
+
+
+      return processed.filter(
+        item => {
+
+          const matchRound =
+            selectedRound === "전체" ||
+            item.분류 === selectedRound;
+
+
+          const matchSeries =
+            selectedSeries === "전체" ||
+            item.series === selectedSeries;
+
+
+          return (
+            matchRound &&
+            matchSeries
+          );
+
+        }
+      );
+
+    }
+
+
+
+    /* ================================
+       차수별 집계
+    ================================= */
+
+    function renderSummary() {
+
+      summaryEl.innerHTML = "";
+
+
+      const selectedSeries =
+        seriesSelect.value;
+
+
+      let summaryData =
+        processed;
+
+
+      if (
+        selectedSeries !==
+        "전체"
+      ) {
+
+        summaryData =
+          processed.filter(
+            item =>
+              item.series ===
+              selectedSeries
+          );
+
+      }
+
+
+      const counts = {};
+
+
+      summaryData.forEach(
+        item => {
+
+          if (
+            !item.분류 ||
+            item.분류 ===
+              "날짜 오류"
+          ) {
+
+            return;
+
+          }
+
+
+          counts[item.분류] =
+            (
+              counts[
+                item.분류
+              ] || 0
+            ) + 1;
+
+        }
+      );
+
+
+
+      const entries =
+        Object.entries(
+          counts
+        ).sort(
+          (a, b) => {
+
+            const aMatch =
+              a[0].match(
+                /^(\d+)-(\d+)차$/
+              );
+
+            const bMatch =
+              b[0].match(
+                /^(\d+)-(\d+)차$/
+              );
+
+
+            if (
+              !aMatch ||
+              !bMatch
+            ) {
+
+              return a[0]
+                .localeCompare(
+                  b[0],
+                  "ko"
+                );
+
+            }
+
+
+            const aYear =
+              Number(
+                aMatch[1]
+              );
+
+            const bYear =
+              Number(
+                bMatch[1]
+              );
+
+            const aRound =
+              Number(
+                aMatch[2]
+              );
+
+            const bRound =
+              Number(
+                bMatch[2]
+              );
+
+
+            if (
+              aYear !==
+              bYear
+            ) {
+
+              return (
+                aYear -
+                bYear
+              );
+
+            }
+
+
+            return (
+              aRound -
+              bRound
+            );
+
+          }
+        );
+
+
+
+      if (
+        entries.length === 0
+      ) {
+
+        summaryEl.innerHTML =
+          '<div class="empty">표시할 데이터가 없습니다.</div>';
+
+        return;
+
+      }
+
+
+
+      entries.forEach(
+        ([label, count]) => {
+
+          const div =
+            document.createElement(
+              "div"
+            );
+
+          div.className =
+            "summary-item";
+
+
+          if (
+            roundSelect.value ===
+            label
+          ) {
+
+            div.classList.add(
+              "active"
+            );
+
+          }
+
+
+          div.innerHTML = `
+            <div class="label">
+              ${label}
+            </div>
+
+            <div class="count">
+              ${count}건
+            </div>
+          `;
+
+
+          div.addEventListener(
+            "click",
+            () => {
+
+              roundSelect.value =
+                roundSelect.value ===
+                label
+                  ? "전체"
+                  : label;
+
+
+              renderSummary();
+              renderTable();
+
+            }
+          );
+
+
+          summaryEl.appendChild(
+            div
+          );
+
+        }
+      );
+
+    }
+
+
+
+    /* ================================
+       상세 테이블
+    ================================= */
+
+    function renderTable() {
+
+      tableBody.innerHTML = "";
+
+
+      const filtered =
+        getFilteredData();
+
+
+      if (
+        filtered.length === 0
+      ) {
+
+        tableBody.innerHTML = `
+          <tr>
+            <td
+              colspan="5"
+              class="empty"
+            >
+              해당 조건의 데이터가 없습니다.
+            </td>
+          </tr>
+        `;
+
+        return;
+
+      }
+
+
+
+      filtered.forEach(
+        item => {
+
+          const tr =
+            document.createElement(
+              "tr"
+            );
+
+
+          tr.innerHTML = `
+            <td>
+              ${item["직렬"] ?? ""}
+            </td>
+
+            <td>
+              ${item["지역"] ?? ""}
+            </td>
+
+            <td>
+              ${item["부대"] ?? ""}
+            </td>
+
+            <td>
+              ${item["임용예정일"] ?? ""}
+            </td>
+
+            <td>
+              <span
+                class="badge ${item.badgeClass}"
+              >
+                ${item.분류}
+              </span>
+            </td>
+          `;
+
+
+          tableBody.appendChild(
+            tr
+          );
+
+        }
+      );
+
+    }
+
+
+
+    /* ================================
+       이벤트
+    ================================= */
+
+    roundSelect.addEventListener(
+      "change",
+      () => {
+
+        renderSummary();
+        renderTable();
+
+      }
+    );
+
+
+    seriesSelect.addEventListener(
+      "change",
+      () => {
+
+        renderSummary();
+        renderTable();
+
+      }
+    );
+
+
+
+    /* ================================
+       최초 화면 출력
+    ================================= */
 
     renderSummary();
     renderTable();
+
   </script>
+
 </body>
 </html>

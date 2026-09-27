@@ -222,9 +222,127 @@
         padding: 10px;
       }
     }
+    /* ===== 상단 헤더 ===== */
+
+.site-top-header {
+    width: 100%;
+    background: #ffffff;
+    border-bottom: 1px solid var(--border);
+    border-radius: 12px;
+    margin-bottom: 30px;
+}
+
+.site-top-inner {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 16px 20px;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+}
+
+.site-logo {
+    color: var(--primary);
+    font-size: 17px;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.site-nav {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.site-nav a {
+    color: var(--text-muted);
+    font-size: 14px;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.site-nav a:hover {
+    color: var(--primary-hover);
+}
+
+
+/* ===== 하단 푸터 ===== */
+
+.site-footer {
+    width: 100%;
+    background: #ffffff;
+    border-top: 1px solid var(--border);
+    border-radius: 12px;
+    margin-top: 30px;
+}
+
+.site-footer-inner {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 24px 20px;
+    text-align: center;
+}
+
+.footer-text {
+    color: var(--text-muted);
+    font-size: 13px;
+    margin-bottom: 5px;
+}
+
+.footer-notice {
+    color: var(--text-muted);
+    font-size: 12px;
+}
+
+
+/* ===== 헤더 모바일 ===== */
+
+@media (max-width: 768px) {
+    .site-top-inner {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .site-nav {
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 14px;
+    }
+}
   </style>
 </head>
 <body>
+
+  <!-- ===== 상단 헤더 ===== -->
+  <header class="site-top-header">
+    <div class="site-top-inner">
+
+      <a href="../조회사이트.html" class="site-logo">
+        🪖 군무원 배정정보
+      </a>
+
+      <nav class="site-nav">
+        <a href="../조회사이트.html">홈</a>
+        <a href="역대근무지역.html">직렬별</a>
+        <a href="ㅇㅇ.html">차수별</a>
+        <a href="지도 나타내기.html">지도 보기</a>
+        <a href="QNA.html">QNA</a>
+
+        <a href="https://gall.dcinside.com/mgallery/board/view?id=soider&amp;no=952492"
+           target="_blank"
+           rel="noopener noreferrer">사용법</a>
+
+        <a href="https://m-recruit.mnd.go.kr/?w2xPath=/ui/ts/common/layout/index.xml"
+           target="_blank"
+           rel="noopener noreferrer">국방 포털</a>
+      </nav>
+
+    </div>
+  </header>
+
+
   <div class="wrap">
     <div class="page-header">
       <h1>Q&A / 데이터 안내</h1>
@@ -245,7 +363,11 @@
 
       <div class="source-box">
         <a href="https://enview.army.mil.kr/board/board.brd?boardId=BOARD_219_56" target="_blank" rel="noopener noreferrer">
-          육군 채용관리 게시판 바로가기
+          육군 채용관리 게시판 바로가기 ~2025
+        </a>
+        <br>
+                <a href="https://m-recruit.mnd.go.kr" target="_blank" rel="noopener noreferrer">
+          육군 채용관리 게시판 바로가기 2026~
         </a>
       </div>
     </div>
@@ -328,10 +450,27 @@
     </div>
 
 
-      <div class="footer-note">
-        ※ 본 페이지는 이용자 이해를 돕기 위한 안내문입니다.
-      </div>
+          <div class="footer-note">
+      ※ 본 페이지는 이용자 이해를 돕기 위한 안내문입니다.
     </div>
+
   </div>
+
+
+  <!-- ===== 하단 푸터 ===== -->
+  <footer class="site-footer">
+    <div class="site-footer-inner">
+
+      <div class="footer-text">
+         ©ㆍ육통이ㆍ
+      </div>
+
+      <div class="footer-notice">
+        본 사이트의 데이터는 참고용이며 실제 인사 결과와 다를 수 있습니다.
+      </div>
+
+    </div>
+  </footer>
+
 </body>
 </html>

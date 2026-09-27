@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>9급 군무원 배정 통계 통합 조회 시스템</title>
+
     <style>
         :root {
             --primary: #1e3a8a;
@@ -30,6 +31,7 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
+                flex-direction: column; /* ← 이것만 추가 */
         }
 
         .container {
@@ -126,86 +128,446 @@
             .menu-grid {
                 grid-template-columns: 1fr;
             }
+
             body {
                 padding: 20px 10px;
             }
         }
+        /* ===== 상단 헤더 ===== */
+
+.site-top-header {
+    width: 100%;
+    background: #ffffff;
+    border-bottom: 1px solid var(--border);
+    border-radius: 12px;
+    margin-bottom: 30px;
+}
+
+.site-top-inner {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 16px 20px;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+}
+
+.site-logo {
+    color: var(--primary);
+    font-size: 17px;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.site-nav {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.site-nav a {
+    color: var(--text-muted);
+    font-size: 14px;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.site-nav a:hover {
+    color: var(--primary-hover);
+}
+
+
+/* ===== 하단 푸터 ===== */
+
+.site-footer {
+    width: 100%;
+    background: #ffffff;
+    border-top: 1px solid var(--border);
+    border-radius: 12px;
+    margin-top: 30px;
+}
+
+.site-footer-inner {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 24px 20px;
+    text-align: center;
+}
+
+.footer-title {
+    color: var(--primary);
+    font-weight: bold;
+    margin-bottom: 7px;
+}
+
+.footer-text {
+    color: var(--text-muted);
+    font-size: 13px;
+    margin-bottom: 5px;
+}
+
+.footer-notice {
+    color: var(--text-muted);
+    font-size: 12px;
+}
+
+
+/* ===== 모바일 ===== */
+
+@media (max-width: 768px) {
+
+    .site-top-inner {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .site-nav {
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 14px;
+    }
+}
     </style>
 </head>
+
 <body>
 
+    <!-- ===== 상단 헤더 ===== -->
+    <header class="site-top-header">
+        <div class="site-top-inner">
+
+            <a href="조회사이트.html" class="site-logo">
+                🪖 군무원 배정정보
+            </a>
+
+            <nav class="site-nav">
+                <a href="조회사이트.html">홈</a>
+                <a href="칼럼/역대근무지역.html">직렬별</a>
+                <a href="칼럼/ㅇㅇ.html">차수별</a>
+                <a href="칼럼/지도 나타내기.html">지도 보기</a>
+                <a href="칼럼/QNA.html">QNA</a>
+<a href="https://gall.dcinside.com/mgallery/board/view?id=soider&no=952492"
+   target="_blank"
+   rel="noopener noreferrer">사용법</a>
+
+<a href="https://m-recruit.mnd.go.kr/?w2xPath=/ui/ts/common/layout/index.xml"
+   target="_blank"
+   rel="noopener noreferrer">국방 포털</a>
+            </nav>
+
+        </div>
+    </header>
+
+
     <div class="container">
+
         <header>
-            <h1>📊 9급 군무원 배정 통계 통합 시스템</h1>
-            <p>ㆍ육통이ㆍ</p>
+            <!--
+                날짜는 아래 JavaScript에서
+                data.js의 가장 최신 임용예정일을 찾아 자동으로 입력
+            -->
+            <h1 id="page-title">📊 9급 군무원 부대분류</h1>
+
+            <p> ㆍ육통이ㆍ</p>
         </header>
 
-        <!-- 💡 중요: image_725cc5.png 구조에 맞춰 경로를 '칼럼/파일명.html'로 완벽 지정했습니다. -->
+
         <div class="menu-grid">
-            
-            <!-- 카드 1: 역대 근무 지역 -->
-            <a href="칼럼/역대근무지역.html" class="menu-card">
-                <div class="menu-icon">🏢</div>
-                <div class="menu-title">직렬별 역대 근무지 분석</div>
-                <div class="menu-desc">원하는 직렬을 선택하여 역대 어떤 지역과 어떤 부대에 가장 많이 배정되었는지 데이터 순위와 비율 그래프를 한눈에 조회합니다.</div>
-                <div class="arrow-link">바로가기 &rarr;</div>
-            </a>
 
-            <!-- 카드 2: 임용연도, 직렬별 -->
-            <a href="칼럼/임용연도,직렬별.html" class="menu-card">
-                <div class="menu-icon">📅</div>
-                <div class="menu-title">임용연도 ✕ 직렬별 현황</div>
-                <div class="menu-desc">특정 임용 예정 연도와 직렬 두 가지 조건을 교차 필터링하여, 당해 연도 세부 배정 현황(지역 및 부대)을 동시에 비교 분석합니다.</div>
-                <div class="arrow-link">바로가기 &rarr;</div>
-            </a>
+    <!-- 1. 직렬별 역대 근무지 -->
+    <a href="칼럼/역대근무지역.html" class="menu-card">
+        <div class="menu-icon">🏢</div>
+        <div class="menu-title">직렬별 역대 근무지 분석</div>
+        <div class="menu-desc">
+            직렬을 선택하면 지역과 부대를 조회합니다.
+        </div>
+        <div class="arrow-link">바로가기 &rarr;</div>
+    </a>
 
-            <!-- 카드 3: 전체 데이터 -->
-            <a href="칼럼/전체 데이터.html" class="menu-card">
-                <div class="menu-icon">🔎</div>
-                <div class="menu-title">전체 데이터베이스</div>
-                <div class="menu-desc">Grid.js 기반의 고성능 테이블 컴포넌트를 이용하여 전체 데이터를 실시간으로 고속 검색하고 오름차순/내림차순 정렬 및 정밀 정제합니다.</div>
-                <div class="arrow-link">바로가기 &rarr;</div>
-            </a>
 
-            <!-- 카드 4: 지도 나타내기 -->
-            <a href="칼럼/지도 나타내기.html" class="menu-card">
-                <div class="menu-icon">🗺️</div>
-                <div class="menu-title">전국 부대 배치 시각화 지도</div>
-                <div class="menu-desc">Leaflet 지도 엔진을 결합하여 선택한 연도 및 직렬의 실제 지리적 배정 포지션을 마커와 반경 그래프, 툴팁을 통해 직관적으로 추적합니다.</div>
-                <div class="arrow-link">바로가기 &rarr;</div>
-            </a>
+    <!-- 2. 차수·직렬 통합 조회 -->
+    <a href="칼럼/ㅇㅇ.html" class="menu-card">
+        <div class="menu-icon">📂</div>
+        <div class="menu-title">차수·직렬 통합 조회</div>
+        <div class="menu-desc">
+            임용 차수와 직렬을 함께 선택하여 조회합니다.
+        </div>
+        <div class="arrow-link">바로가기 &rarr;</div>
+    </a>
 
-            <!-- 카드 5: 최종점수 계산기 -->
-<a href="칼럼/score.html" class="menu-card">
-    <div class="menu-icon">🧮</div>
-    <div class="menu-title">군무원 최종점수 계산기</div>
-    <div class="menu-desc">필기, 가산점, 면접 등을 반영해 최종점수를 계산하는 score.html 페이지로 이동합니다.</div>
-    <div class="arrow-link">바로가기 &rarr;</div>
+
+    <!-- 3. 전국 부대 배치 시각화 -->
+    <a href="칼럼/지도 나타내기.html" class="menu-card">
+        <div class="menu-icon">🗺️</div>
+        <div class="menu-title">전국 부대 배치 시각화 지도</div>
+        <div class="menu-desc">
+            실제 군부대 위치가 아닌 지자체 시청 위치입니다.
+        </div>
+        <div class="arrow-link">바로가기 &rarr;</div>
+    </a>
+
+
+    <!-- 4. 임용연도 × 직렬 -->
+    <a href="칼럼/임용연도,직렬별.html" class="menu-card">
+        <div class="menu-icon">📅</div>
+        <div class="menu-title">임용연도 ✕ 직렬별 현황</div>
+        <div class="menu-desc">
+            임용 연도와 직렬을 함께 선택하여 근무지를 조회합니다.
+        </div>
+        <div class="arrow-link">바로가기 &rarr;</div>
+    </a>
+
+
+    <!-- 5. 전체 데이터베이스 -->
+    <a href="칼럼/전체 데이터.html" class="menu-card">
+        <div class="menu-icon">🔎</div>
+        <div class="menu-title">전체 데이터베이스</div>
+        <div class="menu-desc">
+            2019~2026년까지의 모든 임용자 데이터를 조회합니다.
+        </div>
+        <div class="arrow-link">바로가기 &rarr;</div>
+    </a>
+
+
+    <!-- 6. 7급 -->
+    <a href="칼럼/678급.html" class="menu-card">
+        <div class="menu-icon">🪖</div>
+        <div class="menu-title">7급 군무원 배정 분석</div>
+        <div class="menu-desc">
+            7급 군무원의 배정 현황 사이트
+        </div>
+        <div class="arrow-link">바로가기 &rarr;</div>
+    </a>
+
+
+<!-- 7. 공고 -->
+<a href="2026년 육군 주관 일반군무원 장애인 구분모집 시행계획 공고.pdf"
+   class="menu-card"
+   target="_blank"
+   rel="noopener noreferrer">
+    <div class="menu-icon">📢</div>
+    <div class="menu-title">군무원 공고</div>
+    <div class="menu-desc">
+        2026년 육군 주관 일반군무원 채용 공고를 확인합니다.
+        9월 30일 최합 공고 개시 예정
+    </div>
+    <div class="arrow-link">공고 보기 &rarr;</div>
 </a>
 
-<a href="칼럼/678급.html" class="menu-card">
-    <div class="menu-icon">🪖</div>
-    <div class="menu-title">7급 군무원 배정 분석</div>
-    <div class="menu-desc">678급 군무원의 배정 현황을 분석하고 시각화합니다.</div>
-    <div class="arrow-link">바로가기 &rarr;</div>
-</a>
 
-<a href="칼럼/ㅇㅇ.html" class="menu-card">
-    <div class="menu-icon">📂</div>
-    <div class="menu-title">차수·직렬 통합 조회</div>
-    <div class="menu-desc">임용 차수와 직렬을 함께 선택하여 9급 군무원 배정 데이터를 조건별로 조회합니다.</div>
-    <div class="arrow-link">바로가기 &rarr;</div>
-</a>
-
-<a href="칼럼/QNA.html" class="menu-card">
-    <div class="menu-icon">📂</div>
-    <div class="menu-title">QNA/주의사항</div>
-    <div class="menu-desc">사이트 이용하면서 궁금한 점?</div>
-    <div class="arrow-link">바로가기 &rarr;</div>
-</a>
+    <!-- 8. QNA -->
+    <a href="칼럼/QNA.html" class="menu-card">
+        <div class="menu-icon">📂</div>
+        <div class="menu-title">QNA/주의사항</div>
+        <div class="menu-desc">
+            사이트 이용하면서 궁금한 점?
+        </div>
+        <div class="arrow-link">바로가기 &rarr;</div>
+    </a>
 
         </div>
     </div>
+
+
+    <!-- ===== 하단 푸터 ===== -->
+    <footer class="site-footer">
+        <div class="site-footer-inner">
+
+            <div class="footer-text">
+                 ©ㆍ육통이ㆍ
+            </div>
+
+            <div class="footer-notice">
+                본 사이트의 데이터는 참고용이며 실제 인사 결과와 다를 수 있습니다.
+            </div>
+
+        </div>
+    </footer>
+
+
+    <!-- =========================================
+         data.js 불러오기
+         메인 HTML과 data.js가 같은 폴더 기준
+    ========================================== -->
+    <script src="data.js"></script>
+
+
+    <script>
+
+        /*
+         * "2026. 10. 01"
+         * "2026.10.1."
+         * 같은 날짜를 숫자로 분리
+         */
+        function parseKoreanDotDate(dateStr) {
+
+            const clean = String(dateStr || "")
+                .trim()
+                .replace(/\.$/, "");
+
+            const parts = clean.split(".");
+
+            if (parts.length < 3) {
+                return null;
+            }
+
+            const year = Number(parts[0]);
+            const month = Number(parts[1]);
+            const day = Number(parts[2]);
+
+            if (!year || !month || !day) {
+                return null;
+            }
+
+            /*
+             * 잘못된 날짜 데이터 방지
+             */
+            if (
+                year < 2000 ||
+                year > 2100 ||
+                month < 1 ||
+                month > 12 ||
+                day < 1 ||
+                day > 31
+            ) {
+                return null;
+            }
+
+            return {
+                year,
+                month,
+                day
+            };
+        }
+
+
+        function pad2(num) {
+            return String(num).padStart(2, "0");
+        }
+
+
+        /*
+         * data.js에서 가장 최신 임용예정일 찾기
+         */
+        function updatePageTitle() {
+
+            /*
+             * DATA_STORAGE가 없으면 중단
+             */
+            if (
+                typeof DATA_STORAGE === "undefined" ||
+                !Array.isArray(DATA_STORAGE)
+            ) {
+                return;
+            }
+
+
+            /*
+             * DATA_STORAGE가
+             *
+             * [ {...}, {...} ]
+             *
+             * 형태이거나
+             *
+             * [
+             *   [ {...}, {...} ],
+             *   [ {...}, {...} ]
+             * ]
+             *
+             * 형태여도 모두 처리
+             */
+            const sourceData =
+                Array.isArray(DATA_STORAGE[0])
+                    ? DATA_STORAGE.flat()
+                    : DATA_STORAGE;
+
+
+            let latest = null;
+
+
+            sourceData.forEach(item => {
+
+                if (!item) {
+                    return;
+                }
+
+                const parsed =
+                    parseKoreanDotDate(
+                        item["임용예정일"]
+                    );
+
+                if (!parsed) {
+                    return;
+                }
+
+
+                /*
+                 * 날짜 비교용 숫자
+                 *
+                 * 2026.10.01
+                 * ↓
+                 * 20261001
+                 */
+                const value =
+                    parsed.year * 10000 +
+                    parsed.month * 100 +
+                    parsed.day;
+
+
+                if (
+                    !latest ||
+                    value > latest.value
+                ) {
+
+                    latest = {
+                        value,
+                        year: parsed.year,
+                        month: parsed.month,
+                        day: parsed.day
+                    };
+                }
+            });
+
+
+            /*
+             * 정상적인 날짜가 하나도 없으면
+             * 기본 제목 그대로 유지
+             */
+            if (!latest) {
+                return;
+            }
+
+
+            const year = latest.year;
+            const month = pad2(latest.month);
+            const day = pad2(latest.day);
+
+
+            /*
+             * 제목 변경
+             */
+            const pageTitle =
+                document.getElementById(
+                    "page-title"
+                );
+
+
+            if (pageTitle) {
+
+                pageTitle.textContent =
+                    `📊 9급 군무원 부대분류 ${year}.${month}.${day}. 업뎃`;
+            }
+        }
+
+
+        /*
+         * 실행
+         */
+        updatePageTitle();
+
+    </script>
 
 </body>
 </html>

@@ -3,18 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>임용예정일별/직렬별 근무 지역 및 부대 조회</title>
-    
-    <!-- 💡 상위 폴더(../)에 있는 data.js 파일을 안전하게 불러옵니다. -->
+
+    <!-- 7급 데이터 -->
     <script src="../data1.js" defer></script>
-    
+
     <style>
+        * {
+            box-sizing: border-box;
+        }
+
         body {
             font-family: 'Malgun Gothic', '맑은 고딕', sans-serif;
             margin: 0;
             padding: 20px;
             background-color: #f8f9fa;
+            color: #0f172a;
         }
+
         .container {
             max-width: 1100px;
             margin: 0 auto;
@@ -23,12 +30,14 @@
             border-radius: 8px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
+
         h2 {
             margin-top: 0;
             color: #333;
             border-bottom: 2px solid #28a745;
             padding-bottom: 10px;
         }
+
         .section {
             margin-bottom: 25px;
             padding: 15px;
@@ -36,16 +45,19 @@
             border-radius: 6px;
             background-color: #fafbfc;
         }
+
         .section-title {
             font-weight: bold;
             margin-bottom: 12px;
             color: #495057;
         }
+
         .radio-group {
             display: flex;
             flex-wrap: wrap;
             gap: 10px;
         }
+
         .radio-label {
             display: flex;
             align-items: center;
@@ -58,44 +70,51 @@
             user-select: none;
             font-size: 14px;
         }
+
         .radio-label:hover {
             border-color: #28a745;
             background-color: #f4fbf6;
         }
+
         .radio-label input {
             display: none;
         }
+
         .radio-label.year-active {
             border-color: #28a745;
             background-color: #28a745;
             color: #fff;
             font-weight: bold;
         }
+
         .radio-label.series-active {
             border-color: #0056b3;
             background-color: #0056b3;
             color: #fff;
             font-weight: bold;
         }
+
         #loading {
             color: #666;
             font-style: italic;
         }
-        
-        /* 테이블 동시 배치를 위한 레이아웃 스타일 */
+
         .tables-container {
             display: flex;
             flex-direction: column;
             gap: 30px;
             margin-top: 15px;
         }
+
         .table-wrapper {
             flex: 1;
             background: #fff;
             padding: 15px;
             border: 1px solid #dee2e6;
             border-radius: 6px;
+            overflow-x: auto;
         }
+
         .table-title {
             font-size: 16px;
             font-weight: bold;
@@ -105,28 +124,33 @@
             align-items: center;
             gap: 5px;
         }
-        
+
         table {
             width: 100%;
             border-collapse: collapse;
             background: #fff;
         }
-        th, td {
+
+        th,
+        td {
             border: 1px solid #dee2e6;
             padding: 10px;
             text-align: center;
             font-size: 14px;
         }
+
         th {
             background-color: #e9ecef;
             color: #495057;
         }
+
         .bar-container {
             width: 100%;
             background-color: #e9ecef;
             border-radius: 4px;
             overflow: hidden;
         }
+
         .bar {
             height: 18px;
             text-align: right;
@@ -136,276 +160,1216 @@
             line-height: 18px;
             transition: width 0.3s;
         }
+
         .name-column {
             font-weight: bold;
             text-align: left;
             padding-left: 15px;
         }
+
         .notice-text {
             color: #adb5bd;
             text-align: center;
             padding: 30px 0;
             font-size: 15px;
         }
+
+
+        /* =========================================
+           상단 공통 헤더
+           ========================================= */
+
+        .site-top-header {
+            width: 100%;
+            background: #ffffff;
+            border-bottom: 1px solid #e2e8f0;
+            border-radius: 12px;
+            margin-bottom: 30px;
+        }
+
+        .site-top-inner {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 16px 20px;
+
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .site-logo {
+            color: #1e3a8a;
+            font-size: 17px;
+            font-weight: bold;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .site-nav {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .site-nav a {
+            color: #64748b;
+            font-size: 14px;
+            font-weight: bold;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .site-nav a:hover {
+            color: #2563eb;
+        }
+
+
+        /* =========================================
+           하단 푸터
+           ========================================= */
+
+        .site-footer {
+            width: 100%;
+            background: #ffffff;
+            border-top: 1px solid #e2e8f0;
+            border-radius: 12px;
+            margin-top: 30px;
+        }
+
+        .site-footer-inner {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 24px 20px;
+            text-align: center;
+        }
+
+        .footer-text {
+            color: #64748b;
+            font-size: 13px;
+            margin-bottom: 5px;
+        }
+
+        .footer-notice {
+            color: #64748b;
+            font-size: 12px;
+        }
+
+
+        /* =========================================
+           모바일
+           ========================================= */
+
+        @media (max-width: 768px) {
+            body {
+                padding: 12px;
+            }
+
+            .container {
+                padding: 18px;
+            }
+
+            .site-top-inner {
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .site-nav {
+                justify-content: center;
+                flex-wrap: wrap;
+                gap: 14px;
+            }
+
+            .table-wrapper {
+                padding: 10px;
+            }
+
+            table {
+                min-width: 650px;
+            }
+
+            th,
+            td {
+                padding: 8px;
+                font-size: 13px;
+            }
+        }
     </style>
 </head>
+
 <body>
 
-    <div class="container">
-        <h2>📅 임용예정일 / 직렬별 배정 통계 조회</h2>
-        
-        <div id="loading">데이터를 분석 중입니다... 잠시만 기다려주세요.</div>
 
-        <!-- 1. 임용예정년도 선택 영역 -->
-        <div class="section" id="year-section" style="display:none;">
-            <div class="section-title">1. 임용예정년도 선택</div>
-            <div id="year-group" class="radio-group"></div>
-        </div>
-        
-        <!-- 2. 직렬 선택 영역 -->
-        <div class="section" id="series-section" style="display:none;">
-            <div class="section-title">2. 직렬 선택</div>
-            <div id="series-group" class="radio-group"></div>
-        </div>
-        
-        <!-- 3. 결과 동시 출력 영역 -->
-        <div class="section">
-            <div class="section-title">3. 배정 결과 통계 요약 <span id="selected-title" style="color:#28a745; margin-left:10px;"></span></div>
-            
-            <div id="main-result-wrapper">
-                <p class="notice-text">위에서 임용예정년도와 직렬을 모두 선택하시면 상세 분석 데이터가 동시에 표시됩니다.</p>
-            </div>
-        </div>
+<!-- =========================================
+     상단 공통 헤더
+     ========================================= -->
+
+<div class="site-top-header">
+
+    <div class="site-top-inner">
+
+        <a href="678급.html" class="site-logo">
+            🪖 7급 군무원 배정정보
+        </a>
+
+        <nav class="site-nav">
+
+            <a href="678급.html">
+                홈
+            </a>
+
+            <a href="역대근무지역 copy.html">
+                직렬별
+            </a>
+
+            <a href="ㅇㅇ copy.html">
+                차수별
+            </a>
+
+            <a href="지도 나타내기 copy.html">
+                지도 보기
+            </a>
+
+            <a href="QNA.html">
+                QNA
+            </a>
+
+            <a
+                href="https://gall.dcinside.com/mgallery/board/view?id=soider&amp;no=952492"
+                target="_blank"
+                rel="noopener noreferrer">
+                사용법
+            </a>
+
+            <a
+                href="https://m-recruit.mnd.go.kr/?w2xPath=/ui/ts/common/layout/index.xml"
+                target="_blank"
+                rel="noopener noreferrer">
+                국방 포털
+            </a>
+
+        </nav>
+
     </div>
 
-    <script>
-        let localRawData = [];
-        let selectedYear = "";
-        let selectedSeries = "";
+</div>
 
-        // 연도 보정 함수
-        function extractYear(dateStr) {
-            if (!dateStr) return null;
-            const cleanStr = dateStr.trim();
-            const match4Digit = cleanStr.match(/^(\d{4})/);
-            if (match4Digit) return match4Digit[1];
-            
-            const match2Digit = cleanStr.match(/^(\d{2})/);
-            if (match2Digit) {
-                const shortYear = match2Digit[1];
-                return parseInt(shortYear) >= 0 ? "20" + shortYear : "19" + shortYear;
-            }
+
+<!-- =========================================
+     메인 콘텐츠
+     ========================================= -->
+
+<div class="container">
+
+    <h2>
+        📅 임용예정일 / 직렬별 배정 통계 조회
+    </h2>
+
+
+    <div id="loading">
+        데이터를 분석 중입니다... 잠시만 기다려주세요.
+    </div>
+
+
+    <!-- 1. 임용예정년도 선택 -->
+
+    <div
+        class="section"
+        id="year-section"
+        style="display:none;">
+
+        <div class="section-title">
+            1. 임용예정년도 선택
+        </div>
+
+        <div
+            id="year-group"
+            class="radio-group">
+        </div>
+
+    </div>
+
+
+    <!-- 2. 직렬 선택 -->
+
+    <div
+        class="section"
+        id="series-section"
+        style="display:none;">
+
+        <div class="section-title">
+            2. 직렬 선택
+        </div>
+
+        <div
+            id="series-group"
+            class="radio-group">
+        </div>
+
+    </div>
+
+
+    <!-- 3. 결과 -->
+
+    <div class="section">
+
+        <div class="section-title">
+
+            3. 배정 결과 통계 요약
+
+            <span
+                id="selected-title"
+                style="
+                    color:#28a745;
+                    margin-left:10px;
+                ">
+            </span>
+
+        </div>
+
+
+        <div id="main-result-wrapper">
+
+            <p class="notice-text">
+                위에서 임용예정년도와 직렬을 모두 선택하시면
+                상세 분석 데이터가 동시에 표시됩니다.
+            </p>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================
+     하단 푸터
+     ========================================= -->
+
+<footer class="site-footer">
+
+    <div class="site-footer-inner">
+
+        <div class="footer-text">
+             ©ㆍ육통이ㆍ
+        </div>
+
+        <div class="footer-notice">
+            본 사이트의 데이터는 참고용이며 실제 인사 결과와 다를 수 있습니다.
+        </div>
+
+    </div>
+
+</footer>
+
+
+<script>
+
+    let localRawData = [];
+
+    let selectedYear = "";
+
+    let selectedSeries = "";
+
+
+    /* =========================================
+       임용예정일에서 연도 추출
+       ========================================= */
+
+    function extractYear(dateStr) {
+
+        if (!dateStr) {
             return null;
         }
 
-        // 💡 DATA_STORAGE 변수를 안전하게 가져오는 데이터 로드 로직
-        function loadData() {
-            try {
-                if (typeof DATA_STORAGE !== 'undefined') {
-                    // 2차원 배열 구조 대응
-                    localRawData = Array.isArray(DATA_STORAGE[0]) ? DATA_STORAGE[0] : DATA_STORAGE;
-                    document.getElementById('loading').style.display = 'none';
-                    initFilters();
-                } else {
-                    throw new Error("data.js를 찾지 못했거나 DATA_STORAGE 변수가 정의되지 않았습니다. 파일 경로 및 파일명을 다시 확인해 주세요.");
-                }
-            } catch (error) {
-                document.getElementById('loading').innerText = "데이터 로드 실패: " + error.message;
-                document.getElementById('loading').style.color = '#dc3545';
-                document.getElementById('loading').style.fontWeight = 'bold';
+
+        const cleanStr =
+            String(dateStr).trim();
+
+
+        /*
+         * 2026.10.01
+         * 2026. 10. 01
+         */
+
+        const match4Digit =
+            cleanStr.match(/^(\d{4})/);
+
+
+        if (match4Digit) {
+
+            const year =
+                Number(match4Digit[1]);
+
+
+            /*
+             * 202022 같은 잘못된 연도 방지
+             */
+
+            if (
+                year >= 2000 &&
+                year <= 2100
+            ) {
+                return String(year);
             }
+
+            return null;
         }
 
-        function initFilters() {
-            const yearsSet = new Set();
-            const seriesSet = new Set();
 
-            localRawData.forEach(row => {
-                const appointmentDate = row["임용예정일"];
-                const series = row["직렬"] ? row["직렬"].trim() : "";
+        /*
+         * 혹시 과거 데이터에
+         * 22.10.01 형태가 있는 경우
+         */
 
-                const parsedYear = extractYear(appointmentDate);
-                if (parsedYear) yearsSet.add(parsedYear);
-                
-                if (series && series !== "9급" && series !== "계급") seriesSet.add(series);
-            });
+        const match2Digit =
+            cleanStr.match(/^(\d{2})\./);
 
-            const sortedYears = Array.from(yearsSet).sort((a, b) => b - a);
-            const sortedSeries = Array.from(seriesSet).sort();
 
-            renderYearButtons(sortedYears);
-            renderSeriesButtons(sortedSeries);
+        if (match2Digit) {
 
-            document.getElementById('year-section').style.display = 'block';
-            document.getElementById('series-section').style.display = 'block';
+            const shortYear =
+                Number(match2Digit[1]);
+
+
+            return String(
+                2000 + shortYear
+            );
+
         }
 
-        function renderYearButtons(years) {
-            const container = document.getElementById('year-group');
-            container.innerHTML = "";
-            years.forEach(year => {
-                const label = document.createElement('label');
-                label.className = 'radio-label year-label';
-                
-                const radio = document.createElement('input');
-                radio.type = 'radio';
-                radio.name = 'year-choice';
-                radio.value = year;
-                
-                radio.addEventListener('change', (e) => {
-                    document.querySelectorAll('.year-label').forEach(l => l.classList.remove('year-active'));
-                    label.classList.add('year-active');
-                    selectedYear = e.target.value;
-                    checkAndRender();
-                });
 
-                label.appendChild(radio);
-                label.appendChild(document.createTextNode(year + "년 임용"));
-                container.appendChild(label);
-            });
+        return null;
+    }
+
+
+    /* =========================================
+       DATA_STORAGE 불러오기
+       ========================================= */
+
+    function loadData() {
+
+        try {
+
+            if (
+                typeof DATA_STORAGE === "undefined" ||
+                !Array.isArray(DATA_STORAGE)
+            ) {
+
+                throw new Error(
+                    "data1.js를 찾지 못했거나 DATA_STORAGE 변수가 정의되지 않았습니다."
+                );
+
+            }
+
+
+            /*
+             * 일반 배열
+             *
+             * [
+             *   {...},
+             *   {...}
+             * ]
+             *
+             * 또는
+             *
+             * 중첩 배열
+             *
+             * [
+             *   [{...}, {...}],
+             *   [{...}, {...}]
+             * ]
+             *
+             * 둘 다 처리
+             */
+
+            localRawData =
+                Array.isArray(DATA_STORAGE[0])
+                    ? DATA_STORAGE.flat()
+                    : DATA_STORAGE;
+
+
+            document
+                .getElementById("loading")
+                .style.display =
+                    "none";
+
+
+            initFilters();
+
+        } catch (error) {
+
+            const loading =
+                document.getElementById(
+                    "loading"
+                );
+
+
+            loading.innerText =
+                "데이터 로드 실패: " +
+                error.message;
+
+
+            loading.style.color =
+                "#dc3545";
+
+
+            loading.style.fontWeight =
+                "bold";
+
         }
 
-        function renderSeriesButtons(seriesList) {
-            const container = document.getElementById('series-group');
-            container.innerHTML = "";
-            seriesList.forEach(series => {
-                const label = document.createElement('label');
-                label.className = 'radio-label series-label';
-                
-                const radio = document.createElement('input');
-                radio.type = 'radio';
-                radio.name = 'series-choice';
-                radio.value = series;
-                
-                radio.addEventListener('change', (e) => {
-                    document.querySelectorAll('.series-label').forEach(l => l.classList.remove('series-active'));
-                    label.classList.add('series-active');
-                    selectedSeries = e.target.value;
-                    checkAndRender();
-                });
+    }
 
-                label.appendChild(radio);
-                label.appendChild(document.createTextNode(series));
-                container.appendChild(label);
-            });
-        }
 
-        function checkAndRender() {
-            if (!selectedYear || !selectedSeries) return; 
+    /* =========================================
+       연도 / 직렬 필터 생성
+       ========================================= */
 
-            document.getElementById('selected-title').innerText = `(${selectedYear}년 임용 - ${selectedSeries})`;
+    function initFilters() {
 
-            const regionCounts = {};
-            const unitCounts = {};
-            let totalRegionCount = 0;
-            let totalUnitCount = 0;
+        const yearsSet =
+            new Set();
 
-            localRawData.forEach(row => {
-                const appointmentDate = row["임용예정일"];
-                const rowSeries = row["직렬"] ? row["직렬"].trim() : "";
-                const rowRegion = row["지역"] ? row["지역"].trim() : "";
-                const rowUnit = row["부대"] ? row["부대"].trim() : "";
 
-                const rowYear = extractYear(appointmentDate);
+        const seriesSet =
+            new Set();
 
-                if (rowYear === selectedYear && rowSeries === selectedSeries) {
-                    if (rowRegion) {
-                        if (!regionCounts[rowRegion]) regionCounts[rowRegion] = 0;
-                        regionCounts[rowRegion] += 1;
-                        totalRegionCount += 1;
-                    }
-                    if (rowUnit) {
-                        if (!unitCounts[rowUnit]) unitCounts[rowUnit] = 0;
-                        unitCounts[rowUnit] += 1;
-                        totalUnitCount += 1;
-                    }
-                }
-            });
 
-            renderCombinedTables(regionCounts, totalRegionCount, unitCounts, totalUnitCount);
-        }
+        localRawData.forEach(row => {
 
-        function renderCombinedTables(regionCounts, totalRegion, unitCounts, totalUnit) {
-            const wrapper = document.getElementById('main-result-wrapper');
-            
-            if (totalRegion === 0 && totalUnit === 0) {
-                wrapper.innerHTML = `<p class="notice-text" style="color:#dc3545;">선택하신 조건에 일치하는 데이터가 없습니다.</p>`;
+            if (
+                !row ||
+                typeof row !== "object"
+            ) {
                 return;
             }
 
-            let html = `<div class="tables-container">`;
 
-            html += `
-                <div class="table-wrapper">
-                    <div class="table-title">📍 근무 지역별 배정 현황</div>
-                    ${buildTableHTML(regionCounts, totalRegion, '근무 지역명', '#28a745')}
-                </div>
-            `;
+            const appointmentDate =
+                row["임용예정일"];
 
-            html += `
-                <div class="table-wrapper">
-                    <div class="table-title">🪖 근무 부대별 배정 현황</div>
-                    ${buildTableHTML(unitCounts, totalUnit, '근무 부대명', '#007bff')}
-                </div>
-            `;
 
-            html += `</div>`;
-            wrapper.innerHTML = html;
-        }
+            const series =
+                String(
+                    row["직렬"] || ""
+                ).trim();
 
-        function buildTableHTML(dataMap, totalCount, columnName, themeColor) {
-            if (totalCount === 0) {
-                return `<p style="color:#666; padding:10px; text-align:center;">배정 데이터가 없습니다.</p>`;
+
+            const parsedYear =
+                extractYear(
+                    appointmentDate
+                );
+
+
+            if (parsedYear) {
+
+                yearsSet.add(
+                    parsedYear
+                );
+
             }
 
-            const sortedKeys = Object.keys(dataMap).sort((a, b) => dataMap[b] - dataMap[a]);
-            const maxCount = Math.max(...Object.values(dataMap));
 
-            let tableHtml = `
-                <table>
-                    <thead>
-                        <tr>
-                            <th style="width: 10%;">순위</th>
-                            <th style="width: 30%;">${columnName}</th>
-                            <th style="width: 20%;">배정 자리 수</th>
-                            <th style="width: 15%;">비중 (%)</th>
-                            <th style="width: 25%;">분포 그래프</th>
-                        </tr>
-                    </thead>
-                    <tbody>
+            /*
+             * data1.js 자체가 7급 데이터이므로
+             * 계급 필터는 사용하지 않음.
+             */
+
+            if (
+                series &&
+                series !== "계급" &&
+                series !== "직렬" &&
+                series !== "7급" &&
+                series !== "9급"
+            ) {
+
+                seriesSet.add(
+                    series
+                );
+
+            }
+
+        });
+
+
+        const sortedYears =
+            Array.from(yearsSet)
+                .sort(
+                    (a, b) =>
+                        Number(b) -
+                        Number(a)
+                );
+
+
+        const sortedSeries =
+            Array.from(seriesSet)
+                .sort(
+                    (a, b) =>
+                        a.localeCompare(
+                            b,
+                            "ko"
+                        )
+                );
+
+
+        renderYearButtons(
+            sortedYears
+        );
+
+
+        renderSeriesButtons(
+            sortedSeries
+        );
+
+
+        document
+            .getElementById(
+                "year-section"
+            )
+            .style.display =
+                "block";
+
+
+        document
+            .getElementById(
+                "series-section"
+            )
+            .style.display =
+                "block";
+
+    }
+
+
+    /* =========================================
+       연도 버튼
+       ========================================= */
+
+    function renderYearButtons(years) {
+
+        const container =
+            document.getElementById(
+                "year-group"
+            );
+
+
+        container.innerHTML =
+            "";
+
+
+        if (years.length === 0) {
+
+            container.innerHTML =
+                '<p style="color:#adb5bd;">임용예정년도 데이터가 없습니다.</p>';
+
+            return;
+        }
+
+
+        years.forEach(year => {
+
+            const label =
+                document.createElement(
+                    "label"
+                );
+
+
+            label.className =
+                "radio-label year-label";
+
+
+            const radio =
+                document.createElement(
+                    "input"
+                );
+
+
+            radio.type =
+                "radio";
+
+
+            radio.name =
+                "year-choice";
+
+
+            radio.value =
+                year;
+
+
+            radio.addEventListener(
+                "change",
+                event => {
+
+                    document
+                        .querySelectorAll(
+                            ".year-label"
+                        )
+                        .forEach(
+                            item =>
+                                item.classList.remove(
+                                    "year-active"
+                                )
+                        );
+
+
+                    label.classList.add(
+                        "year-active"
+                    );
+
+
+                    selectedYear =
+                        event.target.value;
+
+
+                    checkAndRender();
+
+                }
+            );
+
+
+            label.appendChild(
+                radio
+            );
+
+
+            label.appendChild(
+                document.createTextNode(
+                    year + "년 임용"
+                )
+            );
+
+
+            container.appendChild(
+                label
+            );
+
+        });
+
+    }
+
+
+    /* =========================================
+       직렬 버튼
+       ========================================= */
+
+    function renderSeriesButtons(
+        seriesList
+    ) {
+
+        const container =
+            document.getElementById(
+                "series-group"
+            );
+
+
+        container.innerHTML =
+            "";
+
+
+        if (seriesList.length === 0) {
+
+            container.innerHTML =
+                '<p style="color:#adb5bd;">7급 직렬 데이터가 없습니다.</p>';
+
+            return;
+        }
+
+
+        seriesList.forEach(series => {
+
+            const label =
+                document.createElement(
+                    "label"
+                );
+
+
+            label.className =
+                "radio-label series-label";
+
+
+            const radio =
+                document.createElement(
+                    "input"
+                );
+
+
+            radio.type =
+                "radio";
+
+
+            radio.name =
+                "series-choice";
+
+
+            radio.value =
+                series;
+
+
+            radio.addEventListener(
+                "change",
+                event => {
+
+                    document
+                        .querySelectorAll(
+                            ".series-label"
+                        )
+                        .forEach(
+                            item =>
+                                item.classList.remove(
+                                    "series-active"
+                                )
+                        );
+
+
+                    label.classList.add(
+                        "series-active"
+                    );
+
+
+                    selectedSeries =
+                        event.target.value;
+
+
+                    checkAndRender();
+
+                }
+            );
+
+
+            label.appendChild(
+                radio
+            );
+
+
+            label.appendChild(
+                document.createTextNode(
+                    series
+                )
+            );
+
+
+            container.appendChild(
+                label
+            );
+
+        });
+
+    }
+
+
+    /* =========================================
+       선택 결과 계산
+       ========================================= */
+
+    function checkAndRender() {
+
+        if (
+            !selectedYear ||
+            !selectedSeries
+        ) {
+            return;
+        }
+
+
+        document
+            .getElementById(
+                "selected-title"
+            )
+            .innerText =
+                `(${selectedYear}년 임용 - ${selectedSeries})`;
+
+
+        const regionCounts =
+            {};
+
+
+        const unitCounts =
+            {};
+
+
+        let totalRegionCount =
+            0;
+
+
+        let totalUnitCount =
+            0;
+
+
+        localRawData.forEach(row => {
+
+            if (
+                !row ||
+                typeof row !== "object"
+            ) {
+                return;
+            }
+
+
+            const appointmentDate =
+                row["임용예정일"];
+
+
+            const rowSeries =
+                String(
+                    row["직렬"] || ""
+                ).trim();
+
+
+            const rowRegion =
+                String(
+                    row["지역"] || ""
+                ).trim();
+
+
+            const rowUnit =
+                String(
+                    row["부대"] || ""
+                ).trim();
+
+
+            const rowYear =
+                extractYear(
+                    appointmentDate
+                );
+
+
+            if (
+                rowYear === selectedYear &&
+                rowSeries === selectedSeries
+            ) {
+
+                if (rowRegion) {
+
+                    if (
+                        !regionCounts[
+                            rowRegion
+                        ]
+                    ) {
+
+                        regionCounts[
+                            rowRegion
+                        ] = 0;
+
+                    }
+
+
+                    regionCounts[
+                        rowRegion
+                    ] += 1;
+
+
+                    totalRegionCount +=
+                        1;
+
+                }
+
+
+                if (rowUnit) {
+
+                    if (
+                        !unitCounts[
+                            rowUnit
+                        ]
+                    ) {
+
+                        unitCounts[
+                            rowUnit
+                        ] = 0;
+
+                    }
+
+
+                    unitCounts[
+                        rowUnit
+                    ] += 1;
+
+
+                    totalUnitCount +=
+                        1;
+
+                }
+
+            }
+
+        });
+
+
+        renderCombinedTables(
+            regionCounts,
+            totalRegionCount,
+            unitCounts,
+            totalUnitCount
+        );
+
+    }
+
+
+    /* =========================================
+       지역 + 부대 결과 출력
+       ========================================= */
+
+    function renderCombinedTables(
+        regionCounts,
+        totalRegion,
+        unitCounts,
+        totalUnit
+    ) {
+
+        const wrapper =
+            document.getElementById(
+                "main-result-wrapper"
+            );
+
+
+        if (
+            totalRegion === 0 &&
+            totalUnit === 0
+        ) {
+
+            wrapper.innerHTML =
+                '<p class="notice-text" style="color:#dc3545;">선택하신 조건에 일치하는 데이터가 없습니다.</p>';
+
+            return;
+        }
+
+
+        let html =
+            '<div class="tables-container">';
+
+
+        html += `
+            <div class="table-wrapper">
+
+                <div class="table-title">
+                    📍 근무 지역별 배정 현황
+                </div>
+
+                ${buildTableHTML(
+                    regionCounts,
+                    totalRegion,
+                    "근무 지역명",
+                    "#28a745"
+                )}
+
+            </div>
+        `;
+
+
+        html += `
+            <div class="table-wrapper">
+
+                <div class="table-title">
+                    🪖 근무 부대별 배정 현황
+                </div>
+
+                ${buildTableHTML(
+                    unitCounts,
+                    totalUnit,
+                    "근무 부대명",
+                    "#007bff"
+                )}
+
+            </div>
+        `;
+
+
+        html +=
+            "</div>";
+
+
+        wrapper.innerHTML =
+            html;
+
+    }
+
+
+    /* =========================================
+       통계 테이블
+       ========================================= */
+
+    function buildTableHTML(
+        dataMap,
+        totalCount,
+        columnName,
+        themeColor
+    ) {
+
+        if (totalCount === 0) {
+
+            return `
+                <p
+                    style="
+                        color:#666;
+                        padding:10px;
+                        text-align:center;
+                    "
+                >
+                    배정 데이터가 없습니다.
+                </p>
             `;
 
-            sortedKeys.forEach((key, index) => {
-                const count = dataMap[key];
-                const percentage = ((count / totalCount) * 100).toFixed(1);
-                const graphWidth = ((count / maxCount) * 100).toFixed(1);
+        }
+
+
+        const sortedKeys =
+            Object.keys(dataMap)
+                .sort(
+                    (a, b) =>
+                        dataMap[b] -
+                        dataMap[a]
+                );
+
+
+        const maxCount =
+            Math.max(
+                ...Object.values(
+                    dataMap
+                )
+            );
+
+
+        let tableHtml = `
+            <table>
+
+                <thead>
+
+                    <tr>
+
+                        <th style="width:10%;">
+                            순위
+                        </th>
+
+                        <th style="width:30%;">
+                            ${columnName}
+                        </th>
+
+                        <th style="width:20%;">
+                            배정 자리 수
+                        </th>
+
+                        <th style="width:15%;">
+                            비중 (%)
+                        </th>
+
+                        <th style="width:25%;">
+                            분포 그래프
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+        `;
+
+
+        sortedKeys.forEach(
+            (key, index) => {
+
+                const count =
+                    dataMap[key];
+
+
+                const percentage =
+                    (
+                        (
+                            count /
+                            totalCount
+                        ) *
+                        100
+                    ).toFixed(1);
+
+
+                const graphWidth =
+                    (
+                        (
+                            count /
+                            maxCount
+                        ) *
+                        100
+                    ).toFixed(1);
+
 
                 tableHtml += `
                     <tr>
-                        <td>${index + 1}</td>
-                        <td class="name-column">${key}</td>
-                        <td><strong>${count.toLocaleString()} 자리</strong></td>
-                        <td>${percentage}%</td>
+
                         <td>
-                            <div class="bar-container">
-                                <div class="bar" style="width: ${graphWidth}%; background-color: ${themeColor};">${percentage}%</div>
-                            </div>
+                            ${index + 1}
                         </td>
+
+                        <td class="name-column">
+                            ${key}
+                        </td>
+
+                        <td>
+                            <strong>
+                                ${count.toLocaleString()} 자리
+                            </strong>
+                        </td>
+
+                        <td>
+                            ${percentage}%
+                        </td>
+
+                        <td>
+
+                            <div class="bar-container">
+
+                                <div
+                                    class="bar"
+                                    style="
+                                        width:${graphWidth}%;
+                                        background-color:${themeColor};
+                                    "
+                                >
+                                    ${percentage}%
+                                </div>
+
+                            </div>
+
+                        </td>
+
                     </tr>
                 `;
-            });
 
-            tableHtml += `
-                    </tbody>
-                </table>
-                <p style="text-align:right; color:#666; font-size:11px; margin-top:8px;">※ 총 합계: ${totalCount.toLocaleString()} 자리</p>
-            `;
+            }
+        );
 
-            return tableHtml;
-        }
 
-        // HTML 렌더링이 완료된 시점에 로드하도록 이벤트 바인딩 방식 교체
-        window.addEventListener('DOMContentLoaded', loadData);
-    </script>
+        tableHtml += `
+                </tbody>
+
+            </table>
+
+            <p
+                style="
+                    text-align:right;
+                    color:#666;
+                    font-size:11px;
+                    margin-top:8px;
+                "
+            >
+                ※ 총 합계:
+                ${totalCount.toLocaleString()} 자리
+            </p>
+        `;
+
+
+        return tableHtml;
+
+    }
+
+
+    /* =========================================
+       실행
+       ========================================= */
+
+    window.addEventListener(
+        "DOMContentLoaded",
+        loadData
+    );
+
+</script>
+
 </body>
 </html>

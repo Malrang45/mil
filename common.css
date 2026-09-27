@@ -1,0 +1,110 @@
+/* ===== 공통 헤더 ===== */
+
+#common-header {
+    width: 100%;
+}
+
+.site-header {
+    width: 100%;
+    background: #ffffff;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.site-header-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 15px 20px;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    gap: 20px;
+}
+
+.site-logo {
+    font-size: 17px;
+    font-weight: bold;
+    color: #1e3a8a;
+    text-decoration: none;
+}
+
+.site-nav {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+}
+
+.site-nav a {
+    color: #475569;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.site-nav a:hover {
+    color: #2563eb;
+}
+
+
+/* ===== 공통 푸터 ===== */
+
+#common-footer {
+    width: 100%;
+}
+
+.site-footer {
+    width: 100%;
+    margin-top: 60px;
+
+    background: #ffffff;
+    border-top: 1px solid #e2e8f0;
+}
+
+.site-footer-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+
+    padding: 28px 20px;
+
+    text-align: center;
+}
+
+.footer-title {
+    font-size: 15px;
+    font-weight: bold;
+    color: #1e3a8a;
+    margin-bottom: 7px;
+}
+
+.footer-text {
+    font-size: 13px;
+    color: #64748b;
+    margin-bottom: 6px;
+}
+
+.footer-notice {
+    font-size: 12px;
+    color: #94a3b8;
+}
+
+
+/* ===== 모바일 ===== */
+
+@media (max-width: 768px) {
+
+    .site-header-inner {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .site-nav {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 15px;
+    }
+
+    .site-nav a {
+        font-size: 13px;
+    }
+}

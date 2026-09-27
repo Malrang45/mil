@@ -4,17 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>7급 직렬별 근무 지역 및 부대 조회</title>
-    
-    <!-- data1.js 데이터 파일 로드 -->
+
+    <!-- 7급 데이터 -->
     <script src="../data1.js" defer></script>
-    
+
     <style>
+        * {
+            box-sizing: border-box;
+        }
+
         body {
             font-family: 'Malgun Gothic', '맑은 고딕', sans-serif;
             margin: 0;
             padding: 20px;
             background-color: #f8f9fa;
+            color: #0f172a;
         }
+
         .container {
             max-width: 1000px;
             margin: 0 auto;
@@ -23,12 +29,14 @@
             border-radius: 8px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
+
         h2 {
             margin-top: 0;
             color: #333;
             border-bottom: 2px solid #0056b3;
             padding-bottom: 10px;
         }
+
         .section {
             margin-bottom: 25px;
             padding: 15px;
@@ -36,16 +44,19 @@
             border-radius: 6px;
             background-color: #fafbfc;
         }
+
         .section-title {
             font-weight: bold;
             margin-bottom: 12px;
             color: #495057;
         }
+
         .radio-group {
             display: flex;
             flex-wrap: wrap;
             gap: 10px;
         }
+
         .radio-label {
             display: flex;
             align-items: center;
@@ -58,19 +69,23 @@
             user-select: none;
             font-size: 14px;
         }
+
         .radio-label:hover {
             border-color: #0056b3;
             background-color: #f0f7ff;
         }
+
         .radio-label input {
             display: none;
         }
+
         .radio-label.active {
             border-color: #0056b3;
             background-color: #0056b3;
             color: #fff;
             font-weight: bold;
         }
+
         #loading {
             color: #666;
             font-style: italic;
@@ -82,6 +97,7 @@
             margin-bottom: 15px;
             border-bottom: 1px solid #dee2e6;
         }
+
         .tab-button {
             padding: 10px 20px;
             cursor: pointer;
@@ -94,14 +110,17 @@
             color: #495057;
             transition: all 0.2s;
         }
+
         .tab-button.active {
             background: #0056b3;
             color: #fff;
             border-color: #0056b3;
         }
+
         .tab-content {
             display: none;
         }
+
         .tab-content.active {
             display: block;
         }
@@ -112,21 +131,26 @@
             margin-top: 5px;
             background: #fff;
         }
-        th, td {
+
+        th,
+        td {
             border: 1px solid #dee2e6;
             padding: 12px;
             text-align: center;
         }
+
         th {
             background-color: #e9ecef;
             color: #495057;
         }
+
         .bar-container {
             width: 100%;
             background-color: #e9ecef;
             border-radius: 4px;
             overflow: hidden;
         }
+
         .bar {
             height: 20px;
             background-color: #007bff;
@@ -137,215 +161,784 @@
             line-height: 20px;
             transition: width 0.3s;
         }
+
         .name-column {
             font-weight: bold;
             text-align: left;
             padding-left: 20px;
         }
+
+
+        /* ===== 상단 공통 헤더 ===== */
+
+        .site-top-header {
+            width: 100%;
+            background: #ffffff;
+            border-bottom: 1px solid #e2e8f0;
+            border-radius: 12px;
+            margin-bottom: 30px;
+        }
+
+        .site-top-inner {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 16px 20px;
+
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .site-logo {
+            color: #1e3a8a;
+            font-size: 17px;
+            font-weight: bold;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .site-nav {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .site-nav a {
+            color: #64748b;
+            font-size: 14px;
+            font-weight: bold;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .site-nav a:hover {
+            color: #2563eb;
+        }
+
+
+        /* ===== 하단 푸터 ===== */
+
+        .site-footer {
+            width: 100%;
+            background: #ffffff;
+            border-top: 1px solid #e2e8f0;
+            border-radius: 12px;
+            margin-top: 30px;
+        }
+
+        .site-footer-inner {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 24px 20px;
+            text-align: center;
+        }
+
+        .footer-text {
+            color: #64748b;
+            font-size: 13px;
+            margin-bottom: 5px;
+        }
+
+        .footer-notice {
+            color: #64748b;
+            font-size: 12px;
+        }
+
+
+        /* ===== 모바일 ===== */
+
+        @media (max-width: 768px) {
+            body {
+                padding: 12px;
+            }
+
+            .container {
+                padding: 18px;
+            }
+
+            .site-top-inner {
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .site-nav {
+                justify-content: center;
+                flex-wrap: wrap;
+                gap: 14px;
+            }
+
+            .tabs {
+                flex-wrap: wrap;
+            }
+
+            .tab-button {
+                padding: 9px 14px;
+                font-size: 13px;
+            }
+
+            th,
+            td {
+                padding: 8px;
+                font-size: 13px;
+            }
+        }
     </style>
 </head>
+
 <body>
 
-    <div class="container">
-        <h2>📊 7급 직렬별 역대 근무 지역 및 부대 조회</h2>
-        
-        <div class="section">
-            <div class="section-title">1. 7급 직렬 선택</div>
-            <div id="loading">데이터를 정밀 분석 중입니다... 잠시만 기다려주세요.</div>
-            <div id="series-group" class="radio-group"></div>
-        </div>
-        
-        <div class="section">
-            <div class="section-title">
-                2. 7급 배정 결과 통계
-                <span id="selected-title" style="color:#0056b3; margin-left:10px;"></span>
-                <span id="total-count-title" style="color:#28a745; margin-left:10px; font-weight: bold;"></span>
-            </div>
-            
-            <div class="tabs">
-                <div class="tab-button active" onclick="switchTab(event, 'region-tab')">📍 지역별 분석</div>
-                <div class="tab-button" onclick="switchTab(event, 'unit-tab')">🪖 부대별 분석</div>
-            </div>
+<!-- ===== 상단 공통 헤더 ===== -->
+<div class="site-top-header">
+    <div class="site-top-inner">
 
-            <div id="region-tab" class="tab-content active">
-                <div id="region-result-wrapper">
-                    <p style="color:#adb5bd;">위에서 7급 직렬을 선택하면 지역별 데이터 개수가 표시됩니다.</p>
-                </div>
-            </div>
+        <a href="678급.html" class="site-logo">
+            🪖 7급 군무원 배정정보
+        </a>
 
-            <div id="unit-tab" class="tab-content">
-                <div id="unit-result-wrapper">
-                    <p style="color:#adb5bd;">위에서 7급 직렬을 선택하면 부대별 데이터 개수가 표시됩니다.</p>
-                </div>
-            </div>
+        <nav class="site-nav">
+            <a href="678급.html">홈</a>
+            <a href="역대근무지역 copy.html">직렬별</a>
+            <a href="ㅇㅇ copy.html">차수별</a>
+            <a href="지도 나타내기 copy.html">지도 보기</a>
+            <a href="QNA.html">QNA</a>
+
+            <a href="https://gall.dcinside.com/mgallery/board/view?id=soider&amp;no=952492"
+               target="_blank"
+               rel="noopener noreferrer">사용법</a>
+
+            <a href="https://m-recruit.mnd.go.kr/?w2xPath=/ui/ts/common/layout/index.xml"
+               target="_blank"
+               rel="noopener noreferrer">국방 포털</a>
+        </nav>
+
+    </div>
+</div>
+
+
+<!-- ===== 메인 콘텐츠 ===== -->
+<div class="container">
+
+    <h2>📊 7급 직렬별 역대 근무 지역 및 부대 조회</h2>
+
+    <div class="section">
+
+        <div class="section-title">
+            1. 7급 직렬 선택
         </div>
+
+        <div id="loading">
+            데이터를 정밀 분석 중입니다... 잠시만 기다려주세요.
+        </div>
+
+        <div
+            id="series-group"
+            class="radio-group">
+        </div>
+
     </div>
 
-    <script>
-        const seriesDataCounts = {};
-        let currentSelectedSeries = "";
 
-        function loadData() {
-            try {
-                if (typeof DATA_STORAGE !== 'undefined') {
-                    const actualData = Array.isArray(DATA_STORAGE[0]) ? DATA_STORAGE[0] : DATA_STORAGE;
-                    processCounts(actualData);
-                } else {
-                    throw new Error("data1.js 안에서 DATA_STORAGE 변수를 찾을 수 없습니다.");
-                }
-            } catch (error) {
-                document.getElementById('loading').innerText = "데이터 로드 실패: " + error.message;
+    <div class="section">
+
+        <div class="section-title">
+            2. 7급 배정 결과 통계
+
+            <span
+                id="selected-title"
+                style="color:#0056b3; margin-left:10px;">
+            </span>
+
+            <span
+                id="total-count-title"
+                style="color:#28a745; margin-left:10px; font-weight:bold;">
+            </span>
+        </div>
+
+
+        <div class="tabs">
+
+            <div
+                class="tab-button active"
+                onclick="switchTab(event, 'region-tab')">
+                📍 지역별 분석
+            </div>
+
+            <div
+                class="tab-button"
+                onclick="switchTab(event, 'unit-tab')">
+                🪖 부대별 분석
+            </div>
+
+        </div>
+
+
+        <div
+            id="region-tab"
+            class="tab-content active">
+
+            <div id="region-result-wrapper">
+
+                <p style="color:#adb5bd;">
+                    위에서 7급 직렬을 선택하면 지역별 데이터 개수가 표시됩니다.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div
+            id="unit-tab"
+            class="tab-content">
+
+            <div id="unit-result-wrapper">
+
+                <p style="color:#adb5bd;">
+                    위에서 7급 직렬을 선택하면 부대별 데이터 개수가 표시됩니다.
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- ===== 하단 푸터 ===== -->
+<footer class="site-footer">
+
+    <div class="site-footer-inner">
+
+        <div class="footer-text">
+             ©ㆍ육통이ㆍ
+        </div>
+
+        <div class="footer-notice">
+            본 사이트의 데이터는 참고용이며 실제 인사 결과와 다를 수 있습니다.
+        </div>
+
+    </div>
+
+</footer>
+
+
+<script>
+    const seriesDataCounts = {};
+    let currentSelectedSeries = "";
+
+
+    /* =========================================
+       data1.js 데이터 불러오기
+       ========================================= */
+
+    function loadData() {
+
+        try {
+
+            if (
+                typeof DATA_STORAGE === "undefined" ||
+                !Array.isArray(DATA_STORAGE)
+            ) {
+                throw new Error(
+                    "data1.js 안에서 DATA_STORAGE 변수를 찾을 수 없습니다."
+                );
             }
+
+
+            /*
+             * DATA_STORAGE가
+             *
+             * [
+             *   [{...}, {...}],
+             *   [{...}, {...}]
+             * ]
+             *
+             * 같은 중첩 배열이어도 전체 데이터를 읽음.
+             */
+
+            const actualData =
+                Array.isArray(DATA_STORAGE[0])
+                    ? DATA_STORAGE.flat()
+                    : DATA_STORAGE;
+
+
+            processCounts(actualData);
+
+        } catch (error) {
+
+            document.getElementById("loading").innerText =
+                "데이터 로드 실패: " + error.message;
+
         }
 
-        function isGrade7(row) {
-            const grade = String(row["계급"] || "").trim();
-            return grade === "7급";
-        }
+    }
 
-        function processCounts(parsedRows) {
-            parsedRows.forEach(row => {
-                if (!isGrade7(row)) return;
 
-                const series = row["직렬"] ? row["직렬"].trim() : "";
-                const region = row["지역"] ? row["지역"].trim() : "";
-                const unit = row["부대"] ? row["부대"].trim() : "";
+    /* =========================================
+       직렬 / 지역 / 부대 집계
+       ========================================= */
 
-                if (!series || series === "계급") return;
+    function processCounts(parsedRows) {
 
-                if (!seriesDataCounts[series]) {
-                    seriesDataCounts[series] = {
-                        regions: {},
-                        units: {}
-                    };
-                }
+        parsedRows.forEach(row => {
 
-                if (region) {
-                    if (!seriesDataCounts[series].regions[region]) {
-                        seriesDataCounts[series].regions[region] = 0;
-                    }
-                    seriesDataCounts[series].regions[region] += 1;
-                }
-
-                if (unit) {
-                    if (!seriesDataCounts[series].units[unit]) {
-                        seriesDataCounts[series].units[unit] = 0;
-                    }
-                    seriesDataCounts[series].units[unit] += 1;
-                }
-            });
-
-            document.getElementById('loading').style.display = 'none';
-            renderSeriesButtons();
-        }
-
-        function renderSeriesButtons() {
-            const container = document.getElementById('series-group');
-            const sortedSeries = Object.keys(seriesDataCounts).sort((a, b) => a.localeCompare(b, 'ko'));
-
-            if (sortedSeries.length === 0) {
-                container.innerHTML = '<p style="color:#adb5bd;">7급 데이터가 존재하지 않습니다.</p>';
+            if (!row || typeof row !== "object") {
                 return;
             }
 
-            sortedSeries.forEach(series => {
-                const label = document.createElement('label');
-                label.className = 'radio-label';
-                
-                const radio = document.createElement('input');
-                radio.type = 'radio';
-                radio.name = 'series-choice';
-                radio.value = series;
-                
-                radio.addEventListener('change', (e) => {
-                    document.querySelectorAll('.radio-label').forEach(l => l.classList.remove('active'));
-                    label.classList.add('active');
-                    currentSelectedSeries = e.target.value;
-                    renderTables(currentSelectedSeries);
-                });
 
-                label.appendChild(radio);
-                label.appendChild(document.createTextNode(series));
-                container.appendChild(label);
-            });
-        }
+            /*
+             * data1.js 자체가 7급 전용 데이터이므로
+             * "계급 === 7급" 검사는 하지 않음.
+             */
 
-        function renderTables(series) {
-            document.getElementById('selected-title').innerText = `(${series})`;
-            
-            const data = seriesDataCounts[series];
-            if (!data) return;
+            const series =
+                String(row["직렬"] || "").trim();
 
-            const totalCount = Object.values(data.regions).reduce((acc, val) => acc + val, 0);
-            document.getElementById('total-count-title').innerText = `[배정 데이터 수: ${totalCount.toLocaleString()} 건]`;
+            const region =
+                String(row["지역"] || "").trim();
 
-            generateHTMLTable(data.regions, 'region-result-wrapper', '근무 지역명', series);
-            generateHTMLTable(data.units, 'unit-result-wrapper', '근무 부대명', series);
-        }
+            const unit =
+                String(row["부대"] || "").trim();
 
-        function generateHTMLTable(targetMap, wrapperId, columnName, series) {
-            const wrapper = document.getElementById(wrapperId);
-            
-            if (!targetMap || Object.keys(targetMap).length === 0) {
-                wrapper.innerHTML = '<p style="color:#adb5bd; padding:15px;">해당 분류의 데이터가 존재하지 않습니다.</p>';
+
+            if (
+                !series ||
+                series === "계급" ||
+                series === "직렬"
+            ) {
                 return;
             }
 
-            const sortedKeys = Object.keys(targetMap).sort((a, b) => targetMap[b] - targetMap[a]);
-            const maxCount = Math.max(...Object.values(targetMap));
-            const totalCount = Object.values(targetMap).reduce((acc, val) => acc + val, 0);
 
-            let html = `
-                <table>
-                    <thead>
-                        <tr>
-                            <th style="width: 10%;">순위</th>
-                            <th style="width: 25%;">${columnName}</th>
-                            <th style="width: 15%;">배정 건수</th>
-                            <th style="width: 15%;">비중 (%)</th>
-                            <th style="width: 35%;">분포 그래프</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-            `;
+            if (!seriesDataCounts[series]) {
 
-            sortedKeys.forEach((key, index) => {
-                const count = targetMap[key];
-                const percentage = ((count / totalCount) * 100).toFixed(1);
-                const graphWidth = ((count / maxCount) * 100).toFixed(1);
+                seriesDataCounts[series] = {
+                    regions: {},
+                    units: {},
+                    total: 0
+                };
+
+            }
+
+
+            /*
+             * 해당 직렬의 전체 데이터 행 수
+             */
+            seriesDataCounts[series].total += 1;
+
+
+            /*
+             * 지역이 공란이 아닐 때만 지역 집계
+             */
+            if (region) {
+
+                if (
+                    !seriesDataCounts[series]
+                        .regions[region]
+                ) {
+                    seriesDataCounts[series]
+                        .regions[region] = 0;
+                }
+
+                seriesDataCounts[series]
+                    .regions[region] += 1;
+
+            }
+
+
+            /*
+             * 부대가 공란이 아닐 때만 부대 집계
+             */
+            if (unit) {
+
+                if (
+                    !seriesDataCounts[series]
+                        .units[unit]
+                ) {
+                    seriesDataCounts[series]
+                        .units[unit] = 0;
+                }
+
+                seriesDataCounts[series]
+                    .units[unit] += 1;
+
+            }
+
+        });
+
+
+        document.getElementById("loading").style.display =
+            "none";
+
+        renderSeriesButtons();
+    }
+
+
+    /* =========================================
+       직렬 선택 버튼
+       ========================================= */
+
+    function renderSeriesButtons() {
+
+        const container =
+            document.getElementById("series-group");
+
+
+        const sortedSeries =
+            Object.keys(seriesDataCounts)
+                .sort(
+                    (a, b) =>
+                        a.localeCompare(b, "ko")
+                );
+
+
+        if (sortedSeries.length === 0) {
+
+            container.innerHTML =
+                '<p style="color:#adb5bd;">7급 데이터가 존재하지 않습니다.</p>';
+
+            return;
+
+        }
+
+
+        sortedSeries.forEach(series => {
+
+            const label =
+                document.createElement("label");
+
+            label.className =
+                "radio-label";
+
+
+            const radio =
+                document.createElement("input");
+
+            radio.type =
+                "radio";
+
+            radio.name =
+                "series-choice";
+
+            radio.value =
+                series;
+
+
+            radio.addEventListener(
+                "change",
+                event => {
+
+                    document
+                        .querySelectorAll(".radio-label")
+                        .forEach(item =>
+                            item.classList.remove("active")
+                        );
+
+
+                    label.classList.add("active");
+
+                    currentSelectedSeries =
+                        event.target.value;
+
+
+                    renderTables(
+                        currentSelectedSeries
+                    );
+
+                }
+            );
+
+
+            label.appendChild(radio);
+
+            label.appendChild(
+                document.createTextNode(series)
+            );
+
+            container.appendChild(label);
+
+        });
+
+    }
+
+
+    /* =========================================
+       선택 직렬 결과 출력
+       ========================================= */
+
+    function renderTables(series) {
+
+        document
+            .getElementById("selected-title")
+            .innerText =
+                `(${series})`;
+
+
+        const data =
+            seriesDataCounts[series];
+
+
+        if (!data) {
+            return;
+        }
+
+
+        /*
+         * 전체 행 개수 기준
+         *
+         * 지역이 공란이어도 해당 직렬 데이터 자체는
+         * 존재하므로 전체 건수에는 포함.
+         */
+
+        document
+            .getElementById("total-count-title")
+            .innerText =
+                `[배정 데이터 수: ${data.total.toLocaleString()} 건]`;
+
+
+        generateHTMLTable(
+            data.regions,
+            "region-result-wrapper",
+            "근무 지역명",
+            series
+        );
+
+
+        generateHTMLTable(
+            data.units,
+            "unit-result-wrapper",
+            "근무 부대명",
+            series
+        );
+
+    }
+
+
+    /* =========================================
+       통계 테이블 생성
+       ========================================= */
+
+    function generateHTMLTable(
+        targetMap,
+        wrapperId,
+        columnName,
+        series
+    ) {
+
+        const wrapper =
+            document.getElementById(wrapperId);
+
+
+        if (
+            !targetMap ||
+            Object.keys(targetMap).length === 0
+        ) {
+
+            wrapper.innerHTML =
+                '<p style="color:#adb5bd; padding:15px;">해당 분류의 데이터가 존재하지 않습니다.</p>';
+
+            return;
+
+        }
+
+
+        const sortedKeys =
+            Object.keys(targetMap)
+                .sort(
+                    (a, b) =>
+                        targetMap[b] -
+                        targetMap[a]
+                );
+
+
+        const maxCount =
+            Math.max(
+                ...Object.values(targetMap)
+            );
+
+
+        const totalCount =
+            Object.values(targetMap)
+                .reduce(
+                    (acc, val) =>
+                        acc + val,
+                    0
+                );
+
+
+        let html = `
+            <table>
+
+                <thead>
+                    <tr>
+                        <th style="width:10%;">
+                            순위
+                        </th>
+
+                        <th style="width:25%;">
+                            ${columnName}
+                        </th>
+
+                        <th style="width:15%;">
+                            배정 건수
+                        </th>
+
+                        <th style="width:15%;">
+                            비중 (%)
+                        </th>
+
+                        <th style="width:35%;">
+                            분포 그래프
+                        </th>
+                    </tr>
+                </thead>
+
+                <tbody>
+        `;
+
+
+        sortedKeys.forEach(
+            (key, index) => {
+
+                const count =
+                    targetMap[key];
+
+
+                const percentage =
+                    (
+                        (count / totalCount) *
+                        100
+                    ).toFixed(1);
+
+
+                const graphWidth =
+                    (
+                        (count / maxCount) *
+                        100
+                    ).toFixed(1);
+
 
                 html += `
                     <tr>
-                        <td>${index + 1}</td>
-                        <td class="name-column">${key}</td>
-                        <td><strong>${count.toLocaleString()} 건</strong></td>
-                        <td>${percentage}%</td>
+
                         <td>
-                            <div class="bar-container">
-                                <div class="bar" style="width: ${graphWidth}%;">${percentage}%</div>
-                            </div>
+                            ${index + 1}
                         </td>
+
+                        <td class="name-column">
+                            ${key}
+                        </td>
+
+                        <td>
+                            <strong>
+                                ${count.toLocaleString()} 건
+                            </strong>
+                        </td>
+
+                        <td>
+                            ${percentage}%
+                        </td>
+
+                        <td>
+
+                            <div class="bar-container">
+
+                                <div
+                                    class="bar"
+                                    style="width:${graphWidth}%;">
+                                    ${percentage}%
+                                </div>
+
+                            </div>
+
+                        </td>
+
                     </tr>
                 `;
-            });
 
-            html += `
-                    </tbody>
-                </table>
-                <p style="text-align:right; color:#666; font-size:12px; margin-top:10px;">※ ${series} 직렬 총 배정 데이터 수: ${totalCount.toLocaleString()} 건</p>
-            `;
-            wrapper.innerHTML = html;
-        }
+            }
+        );
 
-        function switchTab(evt, tabId) {
-            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-            document.querySelectorAll('.tab-button').forEach(button => button.classList.remove('active'));
 
-            document.getElementById(tabId).classList.add('active');
-            evt.currentTarget.classList.add('active');
-        }
+        html += `
+                </tbody>
 
-        window.onload = loadData;
-    </script>
+            </table>
+
+            <p
+                style="
+                    text-align:right;
+                    color:#666;
+                    font-size:12px;
+                    margin-top:10px;
+                "
+            >
+                ※ ${series} 직렬 집계 데이터 수:
+                ${totalCount.toLocaleString()} 건
+            </p>
+        `;
+
+
+        wrapper.innerHTML =
+            html;
+
+    }
+
+
+    /* =========================================
+       지역 / 부대 탭 전환
+       ========================================= */
+
+    function switchTab(
+        evt,
+        tabId
+    ) {
+
+        document
+            .querySelectorAll(".tab-content")
+            .forEach(
+                content =>
+                    content.classList.remove(
+                        "active"
+                    )
+            );
+
+
+        document
+            .querySelectorAll(".tab-button")
+            .forEach(
+                button =>
+                    button.classList.remove(
+                        "active"
+                    )
+            );
+
+
+        document
+            .getElementById(tabId)
+            .classList.add("active");
+
+
+        evt.currentTarget
+            .classList.add("active");
+
+    }
+
+
+    /* =========================================
+       실행
+       ========================================= */
+
+    window.addEventListener(
+        "load",
+        loadData
+    );
+
+</script>
+
 </body>
 </html>

@@ -3,21 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>9급 군무원 통합 조회 시스템</title>
-    
-    <link href="https://unpkg.com/gridjs/dist/theme/mermaid.min.css" rel="stylesheet" />
+
+    <title>7급 군무원 통합 조회 시스템</title>
+
+    <!-- Grid.js -->
+    <link
+        href="https://unpkg.com/gridjs/dist/theme/mermaid.min.css"
+        rel="stylesheet"
+    />
+
     <script src="https://unpkg.com/gridjs/dist/gridjs.umd.js"></script>
-    
-    <!-- 💡 상위 폴더(../)에 있는 data.js 파일을 안전하게 로드합니다. -->
+
+    <!-- 7급 데이터 -->
     <script src="../data1.js" defer></script>
-    
+
     <style>
+        * {
+            box-sizing: border-box;
+        }
+
         body {
             font-family: 'Malgun Gothic', '맑은 고딕', sans-serif;
             margin: 0;
             padding: 20px;
             background-color: #f8f9fa;
+            color: #0f172a;
         }
+
         .container {
             max-width: 1200px;
             margin: 0 auto;
@@ -26,12 +38,14 @@
             border-radius: 8px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
+
         h2 {
             margin-top: 0;
             color: #333;
             border-bottom: 2px solid #007bff;
             padding-bottom: 10px;
         }
+
         #error-message {
             color: #d9534f;
             background-color: #f2dede;
@@ -41,79 +55,436 @@
             margin-bottom: 20px;
             display: none;
         }
-    </style>
-</head>
-<body>
 
-    <div class="container">
-        <h2>📊 9급 군무원 통합 조회</h2>
-        
-        <div id="error-message"></div>
-        
-        <div id="wrapper"></div>
-    </div>
 
-    <script>
-        // 고정할 Grid.js 테이블 헤더 순서
-        const headers = ["계급", "직렬", "지역", "부대", "임용예정일"];
+        /* ===== 상단 공통 헤더 ===== */
 
-        // 💡 DATA_STORAGE 변수를 가공하여 Grid.js 포맷으로 변환하는 로직
-        function loadGridData() {
-            const errorDiv = document.getElementById('error-message');
-            try {
-                // DATA_STORAGE 변수가 선언되어 있는지 체크
-                if (typeof DATA_STORAGE !== 'undefined') {
-                    // 2차원 배열 구조 대응
-                    const actualData = Array.isArray(DATA_STORAGE[0]) ? DATA_STORAGE[0] : DATA_STORAGE;
-                    
-                    // JSON 객체 배열을 Grid.js가 인식할 수 있는 2차원 배열 형태로 정제
-                    const gridData = actualData.map(row => {
-                        return [
-                            row["계급"] ? row["계급"].trim() : "",
-                            row["직렬"] ? row["직렬"].trim() : "",
-                            row["지역"] ? row["지역"].trim() : "",
-                            row["부대"] ? row["부대"].trim() : "",
-                            row["임용예정일"] ? row["임용예정일"].trim() : ""
-                        ];
-                    });
+        .site-top-header {
+            width: 100%;
+            background: #ffffff;
+            border-bottom: 1px solid #e2e8f0;
+            border-radius: 12px;
+            margin-bottom: 30px;
+        }
 
-                    // 테이블 렌더링 시작
-                    renderTable(headers, gridData);
-                } else {
-                    throw new Error("data.js 파일 경로를 찾지 못했거나 변수(DATA_STORAGE) 선언을 찾을 수 없습니다.");
-                }
-            } catch (error) {
-                console.error("오류 발생:", error);
-                errorDiv.style.display = "block";
-                errorDiv.innerHTML = `<strong>⚠️ 데이터 로드 실패:</strong> ${error.message}<br><small style="color:#666;">파일 배치 구조와 변수명을 다시 한 번 점검해 주세요.</small>`;
+        .site-top-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 16px 20px;
+
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .site-logo {
+            color: #1e3a8a;
+            font-size: 17px;
+            font-weight: bold;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .site-nav {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .site-nav a {
+            color: #64748b;
+            font-size: 14px;
+            font-weight: bold;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .site-nav a:hover {
+            color: #2563eb;
+        }
+
+
+        /* ===== Grid.js ===== */
+
+        .gridjs-container {
+            font-family: 'Malgun Gothic', '맑은 고딕', sans-serif;
+        }
+
+        .gridjs-search {
+            margin-bottom: 12px;
+        }
+
+        .gridjs-input {
+            font-family: inherit !important;
+        }
+
+        .gridjs-table {
+            width: 100%;
+        }
+
+
+        /* ===== 하단 푸터 ===== */
+
+        .site-footer {
+            width: 100%;
+            background: #ffffff;
+            border-top: 1px solid #e2e8f0;
+            border-radius: 12px;
+            margin-top: 30px;
+        }
+
+        .site-footer-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 24px 20px;
+            text-align: center;
+        }
+
+        .footer-text {
+            color: #64748b;
+            font-size: 13px;
+            margin-bottom: 5px;
+        }
+
+        .footer-notice {
+            color: #64748b;
+            font-size: 12px;
+        }
+
+
+        /* ===== 모바일 ===== */
+
+        @media (max-width: 768px) {
+            body {
+                padding: 12px;
+            }
+
+            .container {
+                padding: 15px;
+                overflow-x: auto;
+            }
+
+            .site-top-inner {
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .site-nav {
+                justify-content: center;
+                flex-wrap: wrap;
+                gap: 14px;
+            }
+
+            h2 {
+                font-size: 20px;
             }
         }
+    </style>
+</head>
 
-        // Grid.js 라이브러리를 통해 화면에 테이블을 렌더링하는 함수
-        function renderTable(headers, data) {
-            new gridjs.Grid({
-                columns: headers, 
-                data: data,       
-                search: true,     // 실시간 검색 기능 활성화
-                sort: true,       // 컬럼 클릭 시 정렬 기능 활성화
-                resizable: true,  // 컬럼 너비 조절 가능
-                pagination: {
-                    limit: 30     // 한 페이지에 30개씩 페이징 처리
-                },
-                language: {
-                    'search': { 'placeholder': '검색어를 입력하세요...' },
-                    'pagination': {
-                        'previous': '이전',
-                        'next': '다음',
-                        'showing': '보여주는 중',
-                        'results': () => '개의 기록'
-                    }
-                }
-            }).render(document.getElementById("wrapper"));
+
+<body>
+
+
+<!-- ===== 상단 공통 헤더 ===== -->
+
+<div class="site-top-header">
+
+    <div class="site-top-inner">
+
+        <a href="678급.html" class="site-logo">
+            🪖 7급 군무원 배정정보
+        </a>
+
+        <nav class="site-nav">
+
+            <a href="678급.html">
+                홈
+            </a>
+
+            <a href="역대근무지역 copy.html">
+                직렬별
+            </a>
+
+            <a href="ㅇㅇ copy.html">
+                차수별
+            </a>
+
+            <a href="지도 나타내기 copy.html">
+                지도 보기
+            </a>
+
+            <a href="QNA.html">
+                QNA
+            </a>
+
+            <a
+                href="https://gall.dcinside.com/mgallery/board/view?id=soider&amp;no=952492"
+                target="_blank"
+                rel="noopener noreferrer">
+                사용법
+            </a>
+
+            <a
+                href="https://m-recruit.mnd.go.kr/?w2xPath=/ui/ts/common/layout/index.xml"
+                target="_blank"
+                rel="noopener noreferrer">
+                국방 포털
+            </a>
+
+        </nav>
+
+    </div>
+
+</div>
+
+
+<!-- ===== 메인 ===== -->
+
+<div class="container">
+
+    <h2>
+        📊 7급 군무원 통합 조회
+    </h2>
+
+    <div id="error-message"></div>
+
+    <div id="wrapper"></div>
+
+</div>
+
+
+<!-- ===== 하단 푸터 ===== -->
+
+<footer class="site-footer">
+
+    <div class="site-footer-inner">
+
+        <div class="footer-text">
+             ©ㆍ육통이ㆍ
+        </div>
+
+        <div class="footer-notice">
+            본 사이트의 데이터는 참고용이며 실제 인사 결과와 다를 수 있습니다.
+        </div>
+
+    </div>
+
+</footer>
+
+
+<script>
+
+    /*
+     * data1.js는 7급 전용 데이터이므로
+     * 계급 컬럼은 따로 표시하지 않음.
+     */
+
+    const headers = [
+        "직렬",
+        "지역",
+        "부대",
+        "임용예정일"
+    ];
+
+
+    /* =========================================
+       데이터 불러오기
+       ========================================= */
+
+    function loadGridData() {
+
+        const errorDiv =
+            document.getElementById(
+                "error-message"
+            );
+
+
+        try {
+
+            if (
+                typeof DATA_STORAGE === "undefined" ||
+                !Array.isArray(DATA_STORAGE)
+            ) {
+
+                throw new Error(
+                    "data1.js 파일 경로를 찾지 못했거나 DATA_STORAGE 선언을 찾을 수 없습니다."
+                );
+
+            }
+
+
+            /*
+             * 일반 배열:
+             *
+             * [
+             *   {...},
+             *   {...}
+             * ]
+             *
+             * 중첩 배열:
+             *
+             * [
+             *   [{...}, {...}],
+             *   [{...}, {...}]
+             * ]
+             *
+             * 둘 다 처리
+             */
+
+            const actualData =
+                Array.isArray(DATA_STORAGE[0])
+                    ? DATA_STORAGE.flat()
+                    : DATA_STORAGE;
+
+
+            /*
+             * Grid.js용 데이터 변환
+             */
+
+            const gridData =
+                actualData
+                    .filter(row =>
+                        row &&
+                        typeof row === "object"
+                    )
+                    .map(row => {
+
+                        return [
+
+                            String(
+                                row["직렬"] || ""
+                            ).trim(),
+
+                            String(
+                                row["지역"] || ""
+                            ).trim(),
+
+                            String(
+                                row["부대"] || ""
+                            ).trim(),
+
+                            String(
+                                row["임용예정일"] || ""
+                            ).trim()
+
+                        ];
+
+                    });
+
+
+            renderTable(
+                headers,
+                gridData
+            );
+
+        } catch (error) {
+
+            console.error(
+                "오류 발생:",
+                error
+            );
+
+
+            errorDiv.style.display =
+                "block";
+
+
+            errorDiv.innerHTML = `
+                <strong>
+                    ⚠️ 데이터 로드 실패:
+                </strong>
+
+                ${error.message}
+
+                <br>
+
+                <small style="color:#666;">
+                    data1.js 파일 배치 구조와
+                    DATA_STORAGE 변수명을 확인해 주세요.
+                </small>
+            `;
+
         }
 
-        // HTML 렌더링 및 스크립트(defer)가 모두 준비된 시점에 실행
-        window.addEventListener('DOMContentLoaded', loadGridData);
-    </script>
+    }
+
+
+    /* =========================================
+       Grid.js 테이블
+       ========================================= */
+
+    function renderTable(
+        headers,
+        data
+    ) {
+
+        new gridjs.Grid({
+
+            columns: headers,
+
+            data: data,
+
+            search: true,
+
+            sort: true,
+
+            resizable: true,
+
+            pagination: {
+
+                limit: 30
+
+            },
+
+            language: {
+
+                search: {
+
+                    placeholder:
+                        "검색어를 입력하세요..."
+
+                },
+
+                pagination: {
+
+                    previous:
+                        "이전",
+
+                    next:
+                        "다음",
+
+                    showing:
+                        "보여주는 중",
+
+                    results: () =>
+                        "개의 기록"
+
+                }
+
+            }
+
+        }).render(
+            document.getElementById(
+                "wrapper"
+            )
+        );
+
+    }
+
+
+    /* =========================================
+       실행
+       ========================================= */
+
+    window.addEventListener(
+        "DOMContentLoaded",
+        loadGridData
+    );
+
+</script>
+
+
 </body>
 </html>
