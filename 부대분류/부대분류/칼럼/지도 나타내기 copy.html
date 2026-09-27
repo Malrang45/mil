@@ -235,11 +235,14 @@
         let map;
         let markerLayer;
 
-        map = L.map('map').setView([36.25, 127.75], 7);
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png', {
-            attribution: '&copy; OpenStreetMap contributors'
-        }).addTo(map);
-        markerLayer = L.layerGroup().addTo(map);
+map = L.map('map').setView([36.25, 127.75], 7);
+
+L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '&copy; OpenStreetMap contributors'
+}).addTo(map);
+
+markerLayer = L.layerGroup().addTo(map);
 
         function loadStorageData() {
             try {
