@@ -178,7 +178,7 @@ function getRegionCoordinates(region) {
     const name = String(region || "").trim();
     if (REGION_COORDS[name]) return REGION_COORDS[name];
 
-    // "경기 포천", "강원 화천" 같은 표기는 시·군 이름으로 찾습니다.
+    // "포천", "화천" 같은 표기는 시·군 이름으로 찾습니다.
     const parts = name.split(/\s+/);
     const last = parts[parts.length - 1];
     return REGION_COORDS[last] || null;
