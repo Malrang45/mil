@@ -225,14 +225,22 @@ function loadData() {
         });
 
         const series = [
+            "전체",
             ...new Set(parsedData.map(row => row.series))
-        ].sort((a, b) => a.localeCompare(b, "ko"));
+        ].sort((a, b) => {
+            if (a === "전체") return -1;
+            if (b === "전체") return 1;
+            return a.localeCompare(b, "ko");
+        });
 
-        selectedSeries = series.includes("건축")
-            ? "건축"
-            : series.includes("통신")
-                ? "통신"
-                : series[0];
+        // 처음에는 모든 직렬을 표시합니다.
+        selectedSeries = "전체";
+
+        // 실제 데이터 로딩 후 좌표가 등록되지 않은 지역을 확인합니다.
+        const missingRegions = [
+            ...new Set(parsedData.map(row => row.region))
+        ].filter(region => !getRegionCoordinates(region));
+        console.log("좌표 누락 지역:", missingRegions);
 
         renderButtons("year-container", years, "year", "전체");
         renderButtons("series-container", series, "series", selectedSeries);
@@ -274,7 +282,7 @@ function updateMap() {
     markerLayer.clearLayers();
 
     const filtered = parsedData.filter(row =>
-        row.series === selectedSeries &&
+        (selectedSeries === "전체" || row.series === selectedSeries) &&
         (selectedYear === "전체" || row.year === selectedYear)
     );
 
