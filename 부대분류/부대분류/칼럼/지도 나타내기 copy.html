@@ -495,18 +495,18 @@
 
         // 지도의 최대 확대 단계를 8로 제한합니다.
         map = L.map("map", {
-            minZoom: 6,
-            maxZoom: 10
+            minZoom: 5,
+            maxZoom: 18
         }).setView([36.25, 127.75], 7);
 
-        L.tileLayer(
-            "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-            {
-                minZoom: 6,
-                maxZoom: 10,
-                attribution: "&copy; OpenStreetMap contributors"
-            }
-        ).addTo(map);
+L.tileLayer("https://tiles.osm.kr/hot/{z}/{x}/{y}.png", {
+    minZoom: 5,
+    maxZoom: 18,
+    attribution:
+        '&copy; <a href="https://openstreetmap.org/copyright">' +
+        'OpenStreetMap 기여자</a>'
+}).addTo(map);
+
 
         markerLayer = L.layerGroup().addTo(map);
 
