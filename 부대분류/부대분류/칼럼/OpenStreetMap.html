@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>군무원 배치 현황 시각화</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="../data.js" defer></script>
+<style>
+:root{--primary:#1e3a8a;--blue:#2563eb;--green:#22c55e;--bg:#f8fafc;--border:#e2e8f0}
+*{box-sizing:border-box;margin:0;padding:0;font-family:Arial,"Malgun Gothic",sans-serif}
+body{display:flex;flex-direction:column;gap:16px;padding:16px;background:var(--bg)}
+.site-header,.title-header,.panel,.site-footer{border:1px solid var(--border);border-radius:12px;background:#fff}
+.site-header{padding:16px 20px;display:flex;justify-content:space-between;align-items:center;gap:20px}
+.site-logo{font-size:17px;font-weight:bold;color:var(--primary);text-decoration:none}
+nav{display:flex;flex-wrap:wrap;gap:16px}
+nav a{color:#64748b;font-size:14px;font-weight:bold;text-decoration:none}
+.title-header{padding:18px 20px;background:linear-gradient(135deg,var(--primary),#0f172a);color:#fff}
+.title-header h1{font-size:20px}
+.layout{display:grid;grid-template-columns:360px minmax(0,1fr);gap:16px}
+.panel{min-height:560px;padding:18px;display:flex;flex-direction:column;gap:20px}
+h2{margin-bottom:10px;color:#334155;font-size:15px}
+.btn-group{display:flex;flex-wrap:wrap;gap:6px;max-height:210px;overflow:auto}
+button.choice{padding:7px 11px;border:1px solid var(--border);border-radius:20px;background:#f1f5f9;cursor:pointer}
+button.choice.active.year{background:var(--green);color:white}
+button.choice.active.series{background:var(--blue);color:white}
+.stats{margin-top:auto;padding:14px;border:1px solid var(--border);border-radius:8px;background:#f8fafc}
+.stat-row{display:flex;justify-content:space-between;margin-top:8px;font-size:13px}
+.stat-value{color:var(--blue);font-weight:bold}
+#status{margin-top:8px;color:#64748b;font-size:12px}
+#map{height:650px;border:1px solid var(--border);border-radius:12px;background:#eaf0f4}
+.map-note{grid-column:2;margin-top:-10px;color:#64748b;font-size:12px}
+.site-footer{padding:22px;text-align:center;color:#64748b;font-size:12px}
+.site-footer strong{display:block;margin-bottom:5px;font-size:13px}
+.leaflet-popup-content{line-height:1.6}
+@media(max-width:768px){
+ body{padding:10px;gap:12px}
+ .site-header{flex-direction:column}
+ .layout{display:flex;flex-direction:column}
+ .panel{min-height:0}
+ .btn-group{max-height:none}
+ #map{height:450px}
+ .map-note{margin-top:0}
+}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+    <a href="../조회사이트.html" class="site-logo">🪖 군무원 배정정보</a>
+    <nav>
+        <a href="../조회사이트.html">홈</a>
+        <a href="region-history.html">직렬별</a>
+        <a href="round-stats.html">차수별</a>
+        <a href="OpenStreetMap.html">지도 보기</a>
+        <a href="QNA.html">QNA</a>
+    </nav>
+</header>
+
+<header class="title-header">
+    <h1>군무원 배치 현황 시각화</h1>
+</header>
+
+<main class="layout">
+    <section class="panel">
+        <section>
+            <h2>📅 임용예정년도 선택</h2>
+            <div class="btn-group" id="year-container">데이터를 읽어오는 중...</div>
+        </section>
+
+        <section>
+            <h2>🛠️ 직렬 선택</h2>
+            <div class="btn-group" id="series-container">데이터를 읽어오는 중...</div>
+        </section>
+
+        <section class="stats">
+            <h2>📊 실시간 필터 결과</h2>
+            <div id="status">데이터 로딩 중...</div>
+            <div class="stat-row">
+                <span>조건에 맞는 배정 수</span>
+                <span class="stat-value" id="count">0자리</span>
+            </div>
+            <div class="stat-row">
+                <span>전체 데이터 대비 비율</span>
+                <span class="stat-value" id="ratio">0%</span>
+            </div>
+        </section>
+    </section>
+
+    <div id="map" aria-label="지역별 배정 분포 지도"></div>
+    <p class="map-note">마커는 시·군 단위의 대략적인 지역 중심점이며 실제 부대 위치를 나타내지 않습니다.</p>
+</main>
+
+<footer class="site-footer">
+    <strong>©ㆍ육통이ㆍ</strong>
+    본 사이트의 데이터는 참고용이며 실제 인사 결과와 다를 수 있습니다.
+</footer>
+
+<script>
+"use strict";
+
+const REGION_COORDS = {
+    "서울":[37.5665,126.9780], "인천":[37.4563,126.7052],
+    "대전":[36.3504,127.3845], "대구":[35.8714,128.6014],
+    "부산":[35.1796,129.0756], "울산":[35.5389,129.3117],
+    "세종":[36.4800,127.2890], "제주":[33.4996,126.5312],
+    "광주":[35.1595,126.8526],
+
+    "고양":[37.6584,126.8320], "화성":[37.1995,126.8312],
+    "이천":[37.2724,127.4351], "양주":[37.7853,127.0457],
+    "남양주":[37.6360,127.2165], "과천":[37.4264,127.4209],
+    "파주":[37.7594,126.7801], "포천":[37.8949,127.2003],
+    "연천":[38.0964,127.0746], "용인":[37.2410,127.1774],
+    "평택":[36.9921,127.1129], "의정부":[37.7381,127.0337],
+    "시흥":[37.3802,126.8027], "동두천":[37.9037,127.0548],
+    "가평":[37.8314,127.5095], "광명":[37.4785,126.8647],
+    "안양":[37.3916,126.9277], "하남":[37.5394,127.2144],
+    "안성":[37.0080,127.2798], "양평":[37.4918,127.4875],
+    "여주":[37.2982,127.6371], "부천":[37.5034,126.7660],
+    "안산":[37.3219,126.8309], "경기 광주":[37.4040,127.2520],
+    "김포":[37.6152,126.7156], "구리":[37.5943,127.1296],
+
+    "춘천":[37.8813,127.7298], "철원":[38.1469,127.3134],
+    "인제":[38.0696,128.1704], "강릉":[37.7522,128.8758],
+    "홍천":[37.6970,127.8887], "원주":[37.3422,127.9201],
+    "강원 고성":[38.3805,128.4682], "양구":[38.1060,127.9899],
+    "화천":[38.1056,127.7083], "속초":[38.2070,128.5918],
+    "삼척":[37.4498,129.1652], "동해":[37.5247,129.1143],
+    "영월":[37.1838,128.4619], "횡성":[37.4912,127.9846],
+    "양양":[38.0754,128.6190],
+
+    "영동":[36.1748,127.7834], "증평":[36.7878,127.5741],
+    "청주":[36.6358,127.4914], "괴산":[36.8126,127.7946],
+    "제천":[37.1326,128.2141], "음성":[36.9402,127.6907],
+    "충주":[36.9537,127.9242], "단양":[36.9845,128.3648],
+    "옥천":[36.3034,127.5683], "논산":[36.2047,127.0843],
+    "계룡":[36.2745,127.2486], "천안":[36.8151,127.1139],
+    "태안":[36.7456,126.2974], "홍성":[36.6012,126.6608],
+    "금산":[36.1088,127.4842], "보령":[36.3332,126.6129],
+
+    "익산":[35.9483,126.9576], "임실":[35.6176,127.2891],
+    "전주":[35.8242,127.1480], "군산":[35.9676,126.7366],
+    "완주":[35.9048,127.1622], "순창":[35.3744,127.1374],
+    "정읍":[35.5699,126.8586], "남원":[35.4164,127.3904],
+    "장성":[35.3020,126.7844], "목포":[34.8118,126.3922],
+    "순천":[34.9506,127.4872], "무안":[34.9903,126.4817],
+    "나주":[35.0159,126.7107], "담양":[35.3212,126.9881],
+    "강진":[34.6425,126.7672],
+
+    "경산":[35.8246,128.7380], "영천":[35.9733,128.9385],
+    "안동":[36.5684,128.7294], "울진":[36.9932,129.4128],
+    "경주":[35.8562,129.2247], "구미":[36.1194,128.3443],
+    "봉화":[36.8931,128.7324], "창원":[35.2281,128.6811],
+    "진해":[35.1542,128.6825], "함안":[35.2724,128.4065],
+    "김해":[35.2341,128.8809], "창녕":[35.5446,128.4921],
+    "진주":[35.1802,128.1076], "사천":[34.9680,128.0664],
+       "경남 고성":[34.9757,128.3228], "합천":[35.5666,128.1699],
+
+    "성남":[37.420178,127.126280],
+    "평창":[37.368889,128.390278],
+    "진천":[36.856667,127.443333]
+};
+
+const map = L.map("map", {
+    minZoom: 5,
+    maxZoom: 18
+}).setView([36.25, 127.75], 7);
+
+
+L.tileLayer("https://tiles.osm.kr/hot/{z}/{x}/{y}.png", {
+    minZoom: 5,
+    maxZoom: 18,
+    attribution:
+        '&copy; <a href="https://openstreetmap.org/copyright">' +
+        'OpenStreetMap 기여자</a>'
+}).addTo(map);
+
+
+const markerLayer = L.layerGroup().addTo(map);
+let parsedData = [];
+let selectedYear = "전체";
+let selectedSeries = "";
+
+function getRegionCoordinates(region) {
+    const name = String(region || "").trim();
+    if (REGION_COORDS[name]) return REGION_COORDS[name];
+
+    // "포천", "화천" 같은 표기는 시·군 이름으로 찾습니다.
+    const parts = name.split(/\s+/);
+    const last = parts[parts.length - 1];
+    return REGION_COORDS[last] || null;
+}
+
+function loadData() {
+    const status = document.getElementById("status");
+
+    try {
+        if (typeof DATA_STORAGE === "undefined" || !Array.isArray(DATA_STORAGE)) {
+            throw new Error("data.js에서 DATA_STORAGE 배열을 찾을 수 없습니다.");
+        }
+
+        const rows = Array.isArray(DATA_STORAGE[0])
+            ? DATA_STORAGE.flat()
+            : DATA_STORAGE;
+
+        parsedData = rows
+            .filter(row => row && typeof row === "object")
+            .map(row => {
+                const dateText = String(row["임용예정일"] || "");
+                const yearMatch = dateText.match(/\d{4}/);
+
+                return {
+                    series: String(row["직렬"] || "").trim(),
+                    region: String(row["지역"] || "").trim(),
+                    year: yearMatch ? yearMatch[0] : "미정"
+                };
+            })
+            .filter(row => row.series && row.region);
+
+        if (!parsedData.length) {
+            status.textContent = "표시할 수 있는 데이터가 없습니다.";
+            return;
+        }
+
+        const years = [
+            "전체",
+            ...new Set(parsedData.map(row => row.year))
+        ].sort((a, b) => {
+            if (a === "전체") return -1;
+            if (b === "전체") return 1;
+            return Number(b) - Number(a);
+        });
+
+        const series = [
+            "전체",
+            ...new Set(parsedData.map(row => row.series))
+        ].sort((a, b) => {
+            if (a === "전체") return -1;
+            if (b === "전체") return 1;
+            return a.localeCompare(b, "ko");
+        });
+
+        // 처음에는 모든 직렬을 표시합니다.
+        selectedSeries = "전체";
+
+        // 실제 데이터 로딩 후 좌표가 등록되지 않은 지역을 확인합니다.
+        const missingRegions = [
+            ...new Set(parsedData.map(row => row.region))
+        ].filter(region => !getRegionCoordinates(region));
+        console.log("좌표 누락 지역:", missingRegions);
+
+        renderButtons("year-container", years, "year", "전체");
+        renderButtons("series-container", series, "series", selectedSeries);
+        updateMap();
+    } catch (error) {
+        status.textContent = `데이터 오류: ${error.message}`;
+    }
+}
+
+function renderButtons(containerId, values, type, activeValue) {
+    const container = document.getElementById(containerId);
+    container.replaceChildren();
+
+    values.forEach(value => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className =
+            `choice btn-choice ${type} ${value === activeValue ? "active" : ""}`;
+        button.textContent =
+            type === "year" && value !== "전체" ? `${value}년` : value;
+
+        button.addEventListener("click", () => {
+            container.querySelectorAll("button").forEach(item => {
+                item.classList.remove("active");
+            });
+            button.classList.add("active");
+
+            if (type === "year") selectedYear = value;
+            else selectedSeries = value;
+
+            updateMap();
+        });
+
+        container.appendChild(button);
+    });
+}
+
+function updateMap() {
+    markerLayer.clearLayers();
+
+    const filtered = parsedData.filter(row =>
+        (selectedSeries === "전체" || row.series === selectedSeries) &&
+        (selectedYear === "전체" || row.year === selectedYear)
+    );
+
+    document.getElementById("count").textContent = `${filtered.length}자리`;
+
+    const ratio = parsedData.length
+        ? ((filtered.length / parsedData.length) * 100).toFixed(1)
+        : "0.0";
+    document.getElementById("ratio").textContent = `${ratio}%`;
+
+    if (!filtered.length) {
+        document.getElementById("status").textContent =
+            "조건에 맞는 배정 데이터가 없습니다.";
+        return;
+    }
+
+    const groups = new Map();
+
+    filtered.forEach(row => {
+        if (!groups.has(row.region)) {
+            groups.set(row.region, { count: 0, years: new Set() });
+        }
+        const group = groups.get(row.region);
+        group.count += 1;
+        group.years.add(row.year);
+    });
+
+    const bounds = [];
+    const missing = [];
+
+    groups.forEach((group, region) => {
+        const coords = getRegionCoordinates(region);
+
+        if (!coords) {
+            missing.push(region);
+            return;
+        }
+
+        bounds.push(coords);
+
+        const percent = ((group.count / filtered.length) * 100).toFixed(1);
+        const marker = L.circleMarker(coords, {
+            radius: Math.max(12, Math.min(30, group.count * 4)),
+            color: "#1e3a8a",
+            weight: 2,
+            fillColor: "#2563eb",
+            fillOpacity: 0.65
+        });
+
+
+        const years = [...group.years].sort().join(", ");
+        marker.bindTooltip(
+            `<b>${group.count}자리 (${percent}%)</b>`,
+            { permanent: true, direction: "top" }
+        );
+        marker.bindPopup(
+            `<b>${region}</b><br>` +
+            `배정 자리 수: ${group.count}개<br>` +
+            `선택 조건 내 비율: ${percent}%<br>` +
+            `포함 연도: ${years}`
+        );
+
+        markerLayer.addLayer(marker);
+    });
+
+    if (bounds.length) {
+        map.fitBounds(bounds, {
+            padding: [30, 30],
+            maxZoom: 10
+        });
+    }
+
+    document.getElementById("status").textContent = missing.length
+        ? `좌표가 없는 지역: ${[...new Set(missing)].join(", ")}`
+        : "지역별 집계 마커를 표시했습니다.";
+}
+
+window.addEventListener("DOMContentLoaded", loadData);
+</script>
+</body>
+</html>

@@ -5,7 +5,7 @@ document.addEventListener("DOMContentLoaded", () => {
      *
      * 예:
      * /mil/index.html
-     * /mil/칼럼/전체 데이터.html
+     * /mil/칼럼/records.html
      * /mil/부대분류/부대분류/조회사이트.html
      *
      * 모두 /mil/ 을 기준으로 이동
@@ -54,7 +54,7 @@ document.addEventListener("DOMContentLoaded", () => {
                             9급
                         </a>
 
-                        <a href="${root}부대분류/부대분류/칼럼/678급.html">
+                        <a href="${root}부대분류/부대분류/칼럼/index7.html">
                             7급
                         </a>
 
